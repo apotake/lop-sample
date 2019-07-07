@@ -227,7 +227,7 @@ function main()
 
     var grid = new THREE.GridHelper( 200, 6, 0x000000, 0x000000 );
     grid.rotation.x = - Math.PI/2 ;
-    grid.material.opacity = 0.2;
+    grid.material.opacity = 0.5;//0.2;
     grid.material.transparent = true;
     scene.add( grid );
 
@@ -238,7 +238,7 @@ function main()
     loadFBXModel();
 
     // 自然光
-    var ambientLight = new THREE.AmbientLight(0x0c0c0c);
+    var ambientLight = new THREE.AmbientLight(0x606060);
     scene.add(ambientLight);
 
     // スポットライト1
