@@ -12,8 +12,8 @@ var iLinkFrom = [2,4,6,8,3,5,7,9,2,4];//リンクFrom
 var iLinkTo = [4,6,8,10,5,7,9,11,3,5];//リンクTo
 var iLinkSide = [0,0,0,0,1,1,1,1,2,2];//0:左　1:右　2:左->右
 var cylinder = [];  //リンクのMesh
-var strLOPPath = "./data/LOP1.csv";
-var strGaitPath = "./data/LOP1_Gait.csv";
+var strLOPPath = "./data/LOP2.csv";
+var strGaitPath = "./data/LOP2_Gait.csv";
 var strFBXPath = "./models/fbx/ybot.fbx";
 
 var mkrGroup = new THREE.Group();
