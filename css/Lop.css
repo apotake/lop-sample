@@ -1,1 +1,55 @@
+body{
+    margin: 0;
+    overflow: hidden;
+}
 
+.block_l, .block_c, .block_r{
+    cursor: pointer;
+    text-align: center;
+    border: 2px solid white;
+    float:left;
+    border-color: white;
+    background-color: black;
+    width: 100px;
+    color:white;
+    font-size:medium;
+    padding: 0pt;
+}
+@media only screen and (max-device-width: 480px) 
+{  
+    .block_l, .block_c, .block_r
+    {
+        cursor: pointer;
+        text-align: center;
+        border: 2px solid white;
+        float:left;
+        border-color: white;
+        background-color: black;
+        width: 30.0%;
+        color:white;
+        font-size:xx-large;
+        padding: 10pt;
+    }
+    .myCheckbox
+    {
+        font-size:xx-large;
+        margin:	0 0px 5px 10px;
+    }
+    input[type=checkbox] 
+    {
+        width: 50px;
+        height: 50px;
+        vertical-align: middle;
+    }
+    .myRadio
+    {
+        font-size:xx-large;
+        margin:	0 0px 5px 10px;
+    }
+    input[type=radio] 
+    {
+        width: 40px;
+        height: 40px;
+        vertical-align: middle;
+    }        
+}
