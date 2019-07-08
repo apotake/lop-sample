@@ -15,7 +15,7 @@ body{
     font-size:medium;
     padding: 0pt;
 }
-@media only screen and (max-device-width: 480px) 
+@media only screen and (max-device-width: 800px) 
 {  
     h1 {
         color: #364e96;/*文字色*/
