@@ -1,91 +1,81 @@
+
 body{
     margin: 0;
     overflow: hidden;
 }
 
-.block_l, .block_c, .block_r{
-    cursor: pointer;
+/* --------------------------------- */
+.table-ul 
+{
+    background-color:black/* #3ae*/;
+    display: table;
+    table-layout: fixed;
     text-align: center;
-    border: 2px solid white;
-    float:left;
-    border-color: white;
-    background-color: black;
-    width: 100px;
-    color:white;
-    font-size:medium;
-    padding: 0pt;
+    width: 100%;
 }
-@media only screen and (max-device-width: 800px) 
-{  
-    h1 {
-        color: #364e96;/*文字色*/
-        border: solid 3px #364e96;/*線色*/
-        padding: 0.5em;/*文字周りの余白*/
-        border-radius: 0.5em;/*角丸*/
-      }    
-    /*リスト*/
-    ul 
-    {
-        padding: 0;
-    }
+.table-ul li 
+{
+    border-right: 1px solid #fff;
+    display: table-cell;
+    vertical-align: middle;
+}
+.table-ul li:last-child 
+{
+    border-right: 0;
+}
+.table-ul li a 
+{
+    color: #fff;
+    display: block;
+    font-size: 12pt;
+    text-decoration: none;
+    padding: 10px 0;
+}
+/* --------------------------------- */
 
-    ul li, ol li 
+/*　スマホ用画面の設定 */    
+@media only screen and (max-device-width: 480px) 
+{    
+    /* テーブルは差分だけ---------------- */
+    .table-ul li 
     {
-        color: #404040;
-        border-left: solid 6px #1fa67a;/*左側の線*/
-        border-right:  solid 6px #1fa67a;/*左側の線*/
-        border-bottom: solid 2px #dadada;/*下に灰色線*/
-        background: whitesmoke;
-        margin-bottom: 5px;/*下のバーとの余白*/
-        line-height: 1.5;
-        padding: 0.5em;
-        list-style-type: none!important;/*ポチ消す*/
-        /*font-weight: bold;*/
-        font-size: xx-large;
-        text-align: center;
-    }    
-
-    /*LOP画面*/
-    .block_l, .block_c, .block_r
-    {
-        cursor: pointer;
-        text-align: center;
-        border: 2px solid white;
-        float:left;
-        border-color: white;
-        background-color: black;
-        width: 26.0%;
-        color:white;
-        font-size:xx-large;
-        padding: 20pt;
-    }
-    .myCheckbox
-    {
-        font-size:xx-large;
-        margin:	0 0px 5px 10px;
-        padding: 20pt;
-    }
-    input[type=checkbox] 
-    {
-        width: 50px;
-        height: 50px;
-        vertical-align: middle;
-    }
-    .myRadio
-    {
-        font-size:xx-large;
-        margin:	0 0px 5px 10px;
-    }
-    input[type=radio] 
-    {
-        width: 40px;
-        height: 40px;
-        vertical-align: middle;
-    }        
-    p
-    {
-        font-size:xx-large;
-        margin:	0 0px 5px 10px;
         padding: 10pt;
     }
+    .table-ul li a 
+    {
+        font-size: xx-large;        
+    }
+    /* --------------------------------- */
+
+    /* --------------------------------- */
+    /* checkbox02 */
+    input[type=checkbox] {
+        display: none;
+    }
+    input[type="checkbox"].checkbox02:checked + label {
+        background: #31A9EE;
+        color: #ffffff;
+    }
+    /*
+    .check_label:hover {
+        background-color: #E2EDF9;
+    }*/
+    .check_label {
+        display: block;
+        float: left;
+        margin: 5px;
+        width: 20%;/*100px;*/
+        height: 45px;
+        text-align: center;
+        line-height: 45px;
+        /*padding-left: 5px;*/
+        /*padding-right: 5px;*/
+        cursor: pointer;
+        color: #31A9EE;
+        border: 2px solid #006DD9;
+        border-radius: 5px;
+        font-size: xx-large;
+        padding: 10px;
+    }
+    /* --------------------------------- */
 }

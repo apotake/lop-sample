@@ -1,0 +1,70 @@
+@media only screen and (max-device-width: 480px) 
+{  
+    h1 {
+        color: #364e96;/*文字色*/
+        border: solid 3px #364e96;/*線色*/
+        padding: 0.5em;/*文字周りの余白*/
+        border-radius: 0.5em;/*角丸*/
+        font-size: xx-large;
+      }    
+    /*リスト*/
+    ul 
+    {
+        padding: 0;
+    }
+
+    ul li, ol li 
+    {
+        color: #404040;
+        border-left: solid 16px #1fa67a;/*左側の線*/
+        border-right:  solid 16px #1fa67a;/*左側の線*/
+        border-bottom: solid 2px #dadada;/*下に灰色線*/
+        background: whitesmoke;
+        margin-bottom: 5px;/*下のバーとの余白*/
+        line-height: 1.5;
+        padding: 0.5em;
+        list-style-type: none!important;/*ポチ消す*/
+        /*font-weight: bold;*/
+        font-size: xx-large;
+        text-align: center;
+    } 
+    li a
+    {
+        text-decoration: none;/*リンクのアンダーライン非表示*/
+    }
+
+    .radio02{
+        clear:both;
+    }
+    .radio02 input{
+        display: none;
+    }
+    .radio02 label{
+        display: block;
+        float: left;
+        /*cursor: pointer;*/
+        width: 47%;/*200px;*/
+        margin: 1px 0 1px 0;
+        padding: 1.4% 0 1.5% ;
+        border-right: 1px solid #d7d7d7;
+        background: #e5e5e5;
+        color: #555e64;
+        font-size: 14px;
+        text-align: center;
+        line-height: 1;
+        /*transition: .2s;*/
+        font-size: xx-large;
+        padding: 10px;
+    }
+    /*.radio02 label:first-of-type{
+    }*/
+    .radio02 label:last-of-type{
+        border-right: 0px;
+    }
+    .radio02 input[type="radio"]:checked + label {
+        background-color: #a1b91d;
+        color: #fff;
+    }
+          
+    p{font-size: xx-large;}
+}
