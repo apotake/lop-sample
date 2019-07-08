@@ -1,4 +1,4 @@
-//グローバル変数
+﻿//グローバル変数
 var mkr = [];       //マーカの座標
 var sphere = [];    //マーカのMesh
 var iMkrNum = 12;   //マーカ最大数
@@ -12,8 +12,10 @@ var iLinkFrom = [2,4,6,8,3,5,7,9,2,4];//リンクFrom
 var iLinkTo = [4,6,8,10,5,7,9,11,3,5];//リンクTo
 var iLinkSide = [0,0,0,0,1,1,1,1,2,2];//0:左　1:右　2:左->右
 var cylinder = [];  //リンクのMesh
-var strLOPPath = "./data/LOP2.csv";
-var strGaitPath = "./data/LOP2_Gait.csv";
+//var strLOPPath = "./data/LOP2.csv";
+//var strGaitPath = "./data/LOP2_Gait.csv";
+var strLOPPath = "./data/LOP_Aoki.csv";
+var strGaitPath = "./data/LOP_Aoki_Gait.csv";
 var strFBXPath = "./models/fbx/ybot.fbx";
 
 var mkrGroup = new THREE.Group();
@@ -50,10 +52,40 @@ var scene,camera,renderer,controls,datObj,cubeTexture,mesh;　
 
 
 //▼ページの読み込みを待って、getCSVを呼ぶ
-window.addEventListener('load',getGaitCSV);
+//window.addEventListener('load',getGaitCSV);
+window.addEventListener('load',getUrlParam);
+
 
 //▼リサイズのイベントハンドラ
 window.addEventListener('resize',onResize,false);
+
+function getUrlParam()
+{
+    var urlPrm = new Object;
+    var urlSearch = location.search.substring(1).split('&');
+    for(i=0;urlSearch[i];i++) {
+      var kv = urlSearch[i].split('=');
+      urlPrm[kv[0]]=kv[1];
+    }
+
+    if(!urlPrm.data=="")
+    {
+       strLOPPath = "./data/"+urlPrm.data+".csv";
+       strGaitPath = "./data/"+urlPrm.data+"_Gait.csv";
+    }
+    if(urlPrm.model=="1"){
+        strFBXPath = "./models/fbx/xbot.fbx";
+    }
+    else{
+        strFBXPath = "./models/fbx/ybot.fbx";
+    }
+    console.log(urlPrm.model);
+
+    //document.write(urlPrm.data);
+    //document.write("<br>");
+    //document.write(urlPrm.model);
+    getGaitCSV();
+}
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //▼LOPのCSVを読み込む
