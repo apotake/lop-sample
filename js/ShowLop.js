@@ -300,14 +300,14 @@ function main()
     //camera = new THREE.OrthographicCamera(-canW, +canW, canH, -canH);
     scene.add(camera);
     camera.up = new THREE.Vector3(0,0,1);//Z UPにする
-    camera.position.set( -200, 300, 100);
+    camera.position.set( -200, 350, 100);
     camera.lookAt(scene.position);
     
 
     //コントローラー
     orbitcontrols = new THREE.OrbitControls(camera, renderer.domElement);
-    orbitcontrols.maxDistance = 400;
-    orbitcontrols.target.set(0,0,faveZ);//回転中心を設定
+    orbitcontrols.maxDistance = 500;
+    orbitcontrols.target.set(0,0,+faveZ*1.2);//回転中心を設定
                     
     // add the output of the renderer to the html element
     document.getElementById("WebGL-output").appendChild(renderer.domElement);
@@ -600,7 +600,7 @@ function main()
             objLArm.applyQuaternion( quaLArmPre = quaSpine1.clone().inverse().multiply(quaLArm));//Spine1(親)の回転をキャンセル⇒保存
 
             //▼コントロールに合わせて表示/非表示を変更する
-            myModel.visible = document.form1.showModel.checked;
+            myModel.visible = document.form1.showObj[3].checked;
         }
 
         
@@ -697,21 +697,12 @@ function onXY()
 {
     bxy*=-1;
     camera.position.set( 0, 0, bxy*400);  
+
+}	
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//▼リセット
+function onReset()
+{
+    camera.position.set( -200, 350, 100);
 }	
 
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-//▼Maleラジオボタン押下時
-function onRadMale()
-{
-    if(myModel)
-    {
-    }
-    //location.reload();
-}
-
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-//▼Femaleラジオボタン押下時
-function onRadFemale()
-{
-    //location.reload();
-}
