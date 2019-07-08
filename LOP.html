@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>3DLOP</title>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/101/three.min.js"></script>
+       	<!-- マウスコントロールのためのOrbitControl.jsを読み込む -->
+        <script src="./js/controls/OrbitControls.js"></script>
+
+        <!-- マーカの軌跡を描くために読み込む -->
+		<script src='./js/lines/LineSegmentsGeometry.js'></script>
+		<script src='./js/lines/LineGeometry.js'></script>
+		<script src='./js/lines/WireframeGeometry2.js'></script>
+
+        <script src='./js/lines/LineMaterial.js'></script>
+		<script src='./js/lines/LineSegments2.js'></script>
+		<script src='./js/lines/Line2.js'></script>
+        <script src='./js/lines/Wireframe.js'></script>   
+        <!--
+        <script src ='./js/libs/dat.gui.min.js'></script>
+        -->
+        <!-- FBXファイルを読み込むためのライブラリ -->
+		<script src="js/libs/inflate.min.js"></script>
+        <script src="js/loaders/FBXLoader.js"></script>
+        
+        <!-- CSS読み込み -->
+        <link rel="stylesheet" type="text/css" href="./css/Lop.css">
+    
+    </head>
+
+    <body>
+        <div>
+            <div onClick="onXZ()" class="block_l">前額面</div>
+            <div onClick="onYZ()" class="block_c">矢状面</div>
+            <div onClick="onXY()" class="block_r">水平面</div>
+            <form name="form1" class="myCheckbox">
+                <input type="checkbox" name="showObj" value="マーカ" checked="checked">マーカ
+                <input type="checkbox" name="showObj" value="リンク" checked="checked">リンク
+                <input type="checkbox" name="showObj" value="軌跡" checked="checked">軌跡
+                <input type="checkbox" name="showModel" value="モデル" checked="checked">モデル
+            </form>
+            <!--
+            <form name="form2" class="myRadio">
+                [
+                <input type="radio" name="ModelType" value="male" checked="checked" onclick="onRadMale()">male
+                <input type="radio" name="ModelType" value="female" onclick="onRadFemale()">female
+                ]
+            </form>
+        -->
+            <div id="WebGL-output"></div>
+        </div>
+
+        <!-- メインスクリプト読み込み  -->
+        <script src="./js/ShowLop.js"></script>
+
+    </body>
+</html>
