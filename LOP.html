@@ -30,24 +30,19 @@
 
     <body>
         <div>
-            <div onClick="onXZ()" class="block_l">前額面</div>
-            <div onClick="onYZ()" class="block_c">矢状面</div>
-            <div onClick="onXY()" class="block_r">水平面</div>
-            <form name="form1" class="myCheckbox">
-                <input type="checkbox" name="showObj" value="マーカ" checked="checked">マーカ
-                <input type="checkbox" name="showObj" value="リンク" checked="checked">リンク
-                <input type="checkbox" name="showObj" value="軌跡" checked="checked">軌跡
-                <input type="checkbox" name="showModel" value="モデル" checked="checked">モデル
-            </form>
-            <!--
-            <form name="form2" class="myRadio">
-                [
-                <input type="radio" name="ModelType" value="male" checked="checked" onclick="onRadMale()">male
-                <input type="radio" name="ModelType" value="female" onclick="onRadFemale()">female
-                ]
-            </form>
-        -->
-            <div id="WebGL-output"></div>
+        <ul class="table-ul">
+            <li><a href="#" onClick="onXZ()" >前額面</a></li>
+            <li><a href="#" onClick="onYZ()" >矢状面</a></li>
+            <li><a href="#" onClick="onXY()" >水平面</a></li>
+            <li><a href="#" onClick="onReset()" >リセット</a></li>
+        </ul>
+        <form name="form1" class="myCheckbox">
+            <input type="checkbox" name="showObj" value="マーカ" id="Group2_0" class="checkbox02"  checked="checked"/><label for="Group2_0" class="check_label">マーカ</label>
+            <input type="checkbox" name="showObj" value="リンク" id="Group2_1" class="checkbox02"  checked="checked"/><label for="Group2_1" class="check_label">リンク</label>
+            <input type="checkbox" name="showObj" value="軌跡" id="Group2_2" class="checkbox02"  checked="checked"/><label for="Group2_2" class="check_label">軌跡</label>
+            <input type="checkbox" name="showObj" value="モデル" id="Group2_3" class="checkbox02"  checked="checked"/><label for="Group2_3" class="check_label">モデル</label>
+        </form>
+        <div id="WebGL-output"></div>
         </div>
 
         <!-- メインスクリプト読み込み  -->

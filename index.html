@@ -5,19 +5,30 @@
         <title>3D LOP sample</title>
 
         <!-- CSS読み込み -->
-        <link rel="stylesheet" type="text/css" href="./css/Lop.css">
+        <link rel="stylesheet" type="text/css" href="./css/index.css">
             
     </head>
     <body>
         <div style="text-align:center;">        
         <h1>3D LOP sample</h1>
 
+        <!-- 
         <form id="idModel" class="myRadio">
             モデル：
             <input type="radio" name="model" value="0" checked="checked">男性
             <input type="radio" name="model" value="1">女性
-        </form>
 
+        </form>
+        -->
+    
+        <p>モデル</p>
+        <form id="idModel" class="radio02">
+            <input name="model" id="select1" value="0" checked="" type="radio"><label for="select1">男性</label>
+            <input name="model" id="select2" value="1" type="radio"><label for="select2">女性</label>
+        </form>
+        <br><!--改行-->
+        <br><!--改行-->
+        <p>データ</p>
         <ul>
             <li><a href="javascript:void(0)" onclick="showLOP('LOP_Aoki')">[健常] 30歳代男性</a></li>
             <li><a href="javascript:void(0)" onclick="showLOP('LOP_Pat1')">骨盤の後傾</a></li>
@@ -32,8 +43,10 @@
             <li><a href="javascript:void(0)" onclick="showLOP('LOP_Pat10')">前足部接地</a></li>
         </ul>
         </div>
+
         <script>
-            //LOP.htmlに引数付きで遷移する
+            //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+            //▼LOP.htmlに引数付きで遷移する
             function showLOP(strData)
             {
                 //ラジオボタンのモデルを取得する
