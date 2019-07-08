@@ -17,6 +17,35 @@ body{
 }
 @media only screen and (max-device-width: 480px) 
 {  
+    h1 {
+        color: #364e96;/*文字色*/
+        border: solid 3px #364e96;/*線色*/
+        padding: 0.5em;/*文字周りの余白*/
+        border-radius: 0.5em;/*角丸*/
+      }    
+    /*リスト*/
+    ul 
+    {
+        padding: 0;
+    }
+
+    ul li, ol li 
+    {
+        color: #404040;
+        border-left: solid 6px #1fa67a;/*左側の線*/
+        border-right:  solid 6px #1fa67a;/*左側の線*/
+        border-bottom: solid 2px #dadada;/*下に灰色線*/
+        background: whitesmoke;
+        margin-bottom: 5px;/*下のバーとの余白*/
+        line-height: 1.5;
+        padding: 0.5em;
+        list-style-type: none!important;/*ポチ消す*/
+        /*font-weight: bold;*/
+        font-size: xx-large;
+        text-align: center;
+    }    
+
+    /*LOP画面*/
     .block_l, .block_c, .block_r
     {
         cursor: pointer;
@@ -53,4 +82,10 @@ body{
         height: 40px;
         vertical-align: middle;
     }        
+    p
+    {
+        font-size:xx-large;
+        margin:	0 0px 5px 10px;
+        padding: 10pt;
+    }
 }
