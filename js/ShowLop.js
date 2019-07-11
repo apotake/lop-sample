@@ -5,6 +5,7 @@ var iMkrNum = 12;   //マーカ最大数
 var iGoastMkrNum = 10;//ゴーストマーカ数
 var iDataCount=200; //フレーム最大数
 var faveZ;//重心の高さの平均
+var faveHipZ;//腰の高さの平均
 var iF = 0;
 var iFrameOffset;//右接地から左接地のオフセット
 var iHeight;//身長
@@ -32,17 +33,22 @@ var mixer;
 var myModel;
 var skeletonHelper;
 
+var dModelScale;//モデルのスケーリング
+
+
 //各ボーンのオブジェクト
-var objHeadTop_End, objSpine1, objHip;
+var objHeadTop_End, objSpine1, objSpine2, objHip;
 var objRUpLeg, objRLeg, objRFoot, objRToe_End, objRArm;
 var objLUpLeg, objLLeg, objLFoot, objLToe_End, objLArm;
 
 //初期姿勢時のFootのベクトル
 var vRFy_Home, vRFz_Home;
 var vLFy_Home, vLFz_Home;
+//初期姿勢時のHipの位置
+var vHipPos_Home;
 
 //各ボーンの1フレーム前のQuaernion
-var quaSpint1Pre, quaHipPre;
+var quaSpint1Pre, quaSpint2Pre, quaHipPre;
 var quaRUpLegPre, quaRLegPre, quaRFootPre, quaRArmPre;
 var quaLUpLegPre, quaLLegPre, quaLFootPre, quaLArmPre;;
 
@@ -50,6 +56,7 @@ var canW = window.innerWidth; //canvas横:任意値
 var canH = window.innerHeight; //canvas縦:任意値
 var scene,camera,renderer,controls,datObj,cubeTexture,mesh;　
 
+var camera2, cameraNow;
 
 //▼ページの読み込みを待って、getCSVを呼ぶ
 //window.addEventListener('load',getGaitCSV);
@@ -126,6 +133,7 @@ function getLOPCSV()
         }
 
         var iFR=0;
+        faveHipZ =0;
         for( i=1; i<tmp.length; i++ )
         {
             var tmpline = [];
@@ -154,6 +162,7 @@ function getLOPCSV()
                     fminZ = mkr[iMk][iF].z;
             }
 
+            
             iFR++;
 
             if( iFR >= iDataCount)
@@ -161,6 +170,7 @@ function getLOPCSV()
                 break;
             }
         }
+
         //▼ゴーストマーカを定義する
         for( iF=0; iF<iDataCount; iF++ )
         {
@@ -194,7 +204,12 @@ function getLOPCSV()
             mkr[19][iF].set( +mkr[9][iF].x - vRin.x*0.02*iHeight, +mkr[9][iF].y - vRin.y*0.02*iHeight, +mkr[9][iF].z - vRin.z*0.02*iHeight);
             //▼右Foot 内挿
             mkr[21][iF].set( +mkr[11][iF].x - vRin.x*0.023*iHeight, +mkr[11][iF].y - vRin.y*0.023*iHeight, +mkr[11][iF].z - vRin.z*0.023*iHeight);
+
+            //▼腰の高さの平均を求める
+            faveHipZ = +faveHipZ + +mkr[13][iF].z;
+
         }
+        faveHipZ = +faveHipZ/iDataCount;
 
 
         //高さの平均値を出す（+演算子は文字列から数値を取り出す）
@@ -247,7 +262,7 @@ function main()
     scene = new THREE.Scene();
 
     // create a render and set the size
-    renderer = new THREE.WebGLRenderer();
+    renderer = new THREE.WebGLRenderer({antialias: true});
     renderer.setClearColor(new THREE.Color(0xEEEEEE));
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.shadowMap.enabled = true;
@@ -302,7 +317,17 @@ function main()
     camera.up = new THREE.Vector3(0,0,1);//Z UPにする
     camera.position.set( -200, 350, 100);
     camera.lookAt(scene.position);
+
+    cameraNow = camera;
+
+    //カメラ2
+    camera2 = new THREE.OrthographicCamera(-canW, +canW, canH, -canH);
+    scene.add(camera2);
+    camera2.up = new THREE.Vector3(0,0,1);//Z UPにする
+    camera2.position.set( -200, 350, 100);
+    camera2.lookAt(scene.position);
     
+    onResize();
 
     //コントローラー
     orbitcontrols = new THREE.OrbitControls(camera, renderer.domElement);
@@ -312,6 +337,7 @@ function main()
     // add the output of the renderer to the html element
     document.getElementById("WebGL-output").appendChild(renderer.domElement);
 
+    
     //▼レンダリング
     renderScene();
 
@@ -349,6 +375,7 @@ function main()
             //▼各ボーンのオブジェクトを取得する
             objHeadTop_End = myModel.getObjectByName('mixamorigHeadTop_End');
             objSpine1   = myModel.getObjectByName('mixamorigSpine');
+            objSpine2   = myModel.getObjectByName('mixamorigSpine1');
             objHip      = myModel.getObjectByName('mixamorigHips');
             objRUpLeg   = myModel.getObjectByName('mixamorigRightUpLeg');
             objRLeg     = myModel.getObjectByName('mixamorigRightLeg');
@@ -384,18 +411,31 @@ function main()
             //+++++++
 
             //▼腕をそれっぽく曲げておく
-            objRArm.rotation.z = Math.PI/2.5;
+            objRArm.rotation.z = Math.PI/2.25;
+            objRArm.rotation.x = -Math.PI/6;
+            objRArm.children[1].rotation.z = Math.PI/2.1;//12;
+            objRArm.children[1].children[1].rotation.z = Math.PI/3;//12;
+
             objLArm.rotation.z = -Math.PI/2.5;
-            objRArm.children[1].rotation.z = Math.PI/12;
-            objLArm.children[1].rotation.z = -Math.PI/12;
+            objLArm.rotation.x = -Math.PI/5;
+            objLArm.children[1].rotation.z = -Math.PI/2.5;//12;
+            objLArm.children[1].children[1].rotation.z = -Math.PI/3.5;//12;
 
             //▼ 身長からモデルのサイズを調整
+            /*
             var vHeadPos = new THREE.Vector3();
             objHeadTop_End.getWorldPosition(vHeadPos);//頭のワールド座標を取得
             var dRate = iHeight/vHeadPos.y;
             myModel.scale.set(dRate,dRate,dRate);
+            */
 //            console.log(objHip);
-            
+
+            //▼ 腰の高さからモデルのサイズを調整
+            vHipPos_Home = new THREE.Vector3();
+            objHip.getWorldPosition(vHipPos_Home);
+            dModelScale = faveHipZ/vHipPos_Home.y;
+            myModel.scale.set(dModelScale,dModelScale,dModelScale);            
+
         } );
     }
     
@@ -501,15 +541,20 @@ function main()
         //if ( mixer ) mixer.update( delta );
         //if(0)
         if ( myModel )
-        {
-            objHip.position.z = mkr[0][iF].z;
-            objHip.position.x = (+mkr[0][iF].x);//+50;
-            objHip.position.y = mkr[0][iF].y;
+        {     
+            objHip.position.z = +mkr[13][iF].z/dModelScale;
+            objHip.position.x = +mkr[13][iF].x/dModelScale;
+            objHip.position.y = +mkr[13][iF].y/dModelScale;
+ 
+/*
+            myModel.position.x = +mkr[0][iF].x;// - vHipPos_Home.x;//+50;
+            myModel.position.z = +mkr[0][iF].z;// - vHipPos_Home.z;
+            myModel.position.y = +mkr[0][iF].y;// - vHipPos_Home.y;
+*/
 
             var vx = new THREE.Vector3(1,0,0);
             var vy = new THREE.Vector3(0,1,0);
             var vz = new THREE.Vector3(0,0,1);
-
 
             //▼一つ前のフレームのクォータニオンをかけて、初期姿勢に戻す
             if(quaHipPre)
@@ -518,8 +563,8 @@ function main()
                 objHip.applyQuaternion( quaHipPre.inverse() );
                 //上肢
                 objSpine1.applyQuaternion( quaSpine1Pre.inverse());
-                objRArm.applyQuaternion( quaRArmPre.inverse());
-                objLArm.applyQuaternion( quaLArmPre.inverse());
+                objSpine2.applyQuaternion( quaSpine2Pre.inverse());
+//                objLArm.applyQuaternion( quaLArmPre.inverse());
 
                 //右足
                 objRUpLeg.applyQuaternion(quaRUpLegPre.inverse());
@@ -538,9 +583,12 @@ function main()
             var vHipz = v1312.clone().cross(v45).normalize();
             var vHipy = v45.clone().cross(vHipz).normalize();
 
+            var vSpine1y = v1312.clone().normalize();
+            var vSpine1z = vHipz.clone();
+
             var v23 = mkr[3][iF].clone().sub(mkr[2][iF]).normalize();
-            var vSpine1z = v1312.clone().cross(v23).normalize();
-            var vSpine1y = v23.clone().cross(vSpine1z).normalize();
+            var vSpine2z = v1312.clone().cross(v23).normalize();
+            var vSpine2y = v23.clone().cross(vSpine1z).normalize();
 
 
             var v75 = mkr[15][iF].clone().sub(mkr[17][iF]).normalize();
@@ -589,15 +637,20 @@ function main()
             objLFoot.applyQuaternion( quaLFootPre = quaLLeg.clone().inverse().multiply(quaLFoot));//Leg(親)の回転をキャンセル⇒保存
 
             //▼ 体幹 --------------------------------
-            //◆Spine
+            //◆Spine1
             var quaSpine1 = rotateVectorsSimultaneously(vy,vz,vSpine1y,vSpine1z);
             objSpine1.applyQuaternion( quaSpine1Pre = quaHip.clone().inverse().multiply(quaSpine1));//Hip(親)の回転をキャンセル⇒保存
+
+            //◆Spine2
+            var quaSpine2 = rotateVectorsSimultaneously(vy,vz,vSpine2y,vSpine2z);
+            objSpine2.applyQuaternion( quaSpine2Pre = quaSpine1.clone().inverse().multiply(quaSpine2));//Spine1(親)の回転をキャンセル⇒保存
+
             //◆右腕
-            var quaRArm = quaLUpLeg.clone();//右腕は左大腿の動きをコピー
-            objRArm.applyQuaternion( quaRArmPre = quaSpine1.clone().inverse().multiply(quaRArm));//Spine1(親)の回転をキャンセル⇒保存
+           // var quaRArm = quaLUpLeg.clone();//右腕は左大腿の動きをコピー
+           // objRArm.applyQuaternion( quaRArmPre = quaSpine1.clone().inverse().multiply(quaRArm));//Spine1(親)の回転をキャンセル⇒保存
             //◆左腕
-            var quaLArm = quaRUpLeg.clone();//左腕は右大腿の動きをコピー
-            objLArm.applyQuaternion( quaLArmPre = quaSpine1.clone().inverse().multiply(quaLArm));//Spine1(親)の回転をキャンセル⇒保存
+           // var quaLArm = quaRUpLeg.clone();//左腕は右大腿の動きをコピー
+           // objLArm.applyQuaternion( quaLArmPre = quaSpine1.clone().inverse().multiply(quaLArm));//Spine1(親)の回転をキャンセル⇒保存
 
             //▼コントロールに合わせて表示/非表示を変更する
             myModel.visible = document.form1.showObj[3].checked;
@@ -617,7 +670,7 @@ function main()
 
         requestAnimationFrame(renderScene);//60fpsで再生しようとする
         orbitcontrols.update();
-        renderer.render(scene, camera);
+        renderer.render(scene, cameraNow);
     }
     
     //-----------------------------------------------------------------------------------------
@@ -675,6 +728,15 @@ function onResize()
     camera.aspect = canW / canH;
     camera.updateProjectionMatrix();
     renderer.setSize(canW, canH);
+
+    // update the camera
+    var dRate = window.innerWidth/window.innerHeight;
+    var dH=100;
+    camera2.left    = -dH*dRate;
+    camera2.right   = dH*dRate;
+    camera2.top     = dH;
+    camera2.bottom  = -dH;
+    camera2.updateProjectionMatrix();    
 }
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -682,21 +744,32 @@ function onResize()
 function onXZ()
 {
     bxz *=-1;
-    camera.position.set( 0, bxz*400, 0);                
+    camera2.position.set( 0, bxz*300, faveZ);                
+    camera2.up = new THREE.Vector3(0,0,1);//Z UPにする
+    camera2.lookAt(new THREE.Vector3(0,0,faveZ));
+    cameraNow=camera2;
+
 }
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //▼矢状面
 function onYZ()
 {
     byz *=-1;
-    camera.position.set( byz*400, 0, 0);                
+    camera2.position.set( byz*300, 0, faveZ);                
+    camera2.up = new THREE.Vector3(0,0,1);//Z UPにする
+    camera2.lookAt(new THREE.Vector3(0,0,faveZ));
+    cameraNow=camera2;
+
 }
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //▼水平面
 function onXY()
 {
     bxy*=-1;
-    camera.position.set( 0, 0, bxy*400);  
+    camera2.position.set( 0, 0, bxy*300);  
+    camera2.up = new THREE.Vector3(0,1,0);//Y UPにする
+    camera2.lookAt(new THREE.Vector3(0,0,0));
+    cameraNow=camera2;
 
 }	
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -704,5 +777,7 @@ function onXY()
 function onReset()
 {
     camera.position.set( -200, 350, 100);
+    cameraNow=camera;
 }	
+
 
