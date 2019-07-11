@@ -33,6 +33,34 @@ body{
 }
 /* --------------------------------- */
 
+/* --------------------------------- */
+/* checkbox02 */
+input[type=checkbox] {
+    display: none;
+}
+input[type="checkbox"].checkbox02:checked + label {
+    background: #31A9EE;
+    color: #ffffff;
+}
+.check_label {
+    display: block;
+    float: left;
+    margin: 2px;
+    width: 80px;
+    height: 10px;
+    text-align: center;
+    line-height: 10px;
+    /*padding-left: 5px;*/
+    /*padding-right: 5px;*/
+    cursor: pointer;
+    color: #31A9EE;
+    border: 2px solid #006DD9;
+    border-radius: 5px;
+    /*font-size: xx-large;*/
+    padding: 10px;
+}
+/* --------------------------------- */
+
 /*　スマホ用画面の設定 */    
 @media only screen and (max-device-width: 480px) 
 {    
@@ -49,33 +77,13 @@ body{
 
     /* --------------------------------- */
     /* checkbox02 */
-    input[type=checkbox] {
-        display: none;
-    }
-    input[type="checkbox"].checkbox02:checked + label {
-        background: #31A9EE;
-        color: #ffffff;
-    }
-    /*
-    .check_label:hover {
-        background-color: #E2EDF9;
-    }*/
-    .check_label {
-        display: block;
-        float: left;
+   .check_label {
         margin: 5px;
-        width: 20%;/*100px;*/
+        width: 21%;/*100px;*/
         height: 45px;
-        text-align: center;
         line-height: 45px;
-        /*padding-left: 5px;*/
-        /*padding-right: 5px;*/
-        cursor: pointer;
-        color: #31A9EE;
-        border: 2px solid #006DD9;
         border-radius: 5px;
         font-size: xx-large;
-        padding: 10px;
     }
     /* --------------------------------- */
 }
