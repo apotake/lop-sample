@@ -86,11 +86,7 @@ function getUrlParam()
     else{
         strFBXPath = "./models/fbx/ybot.fbx";
     }
-    console.log(urlPrm.model);
 
-    //document.write(urlPrm.data);
-    //document.write("<br>");
-    //document.write(urlPrm.model);
     getGaitCSV();
 }
 
@@ -211,10 +207,15 @@ function getLOPCSV()
         }
         faveHipZ = +faveHipZ/iDataCount;
 
+        console.log(faveHipZ);
 
+        /*
         //高さの平均値を出す（+演算子は文字列から数値を取り出す）
         faveZ = ( (+fmaxZ) + (+fminZ) )/2;
         faveZ = +faveZ + 15;//頭の高さの半分だけ高くする
+        console.log(faveZ);
+        */
+        faveZ = 70;
     }
 }
 
@@ -332,7 +333,7 @@ function main()
     //コントローラー
     orbitcontrols = new THREE.OrbitControls(camera, renderer.domElement);
     orbitcontrols.maxDistance = 500;
-    orbitcontrols.target.set(0,0,+faveZ*1.2);//回転中心を設定
+    orbitcontrols.target.set(0,0,+faveZ);//回転中心を設定
                     
     // add the output of the renderer to the html element
     document.getElementById("WebGL-output").appendChild(renderer.domElement);
@@ -420,15 +421,6 @@ function main()
             objLArm.rotation.x = -Math.PI/5;
             objLArm.children[1].rotation.z = -Math.PI/2.5;//12;
             objLArm.children[1].children[1].rotation.z = -Math.PI/3.5;//12;
-
-            //▼ 身長からモデルのサイズを調整
-            /*
-            var vHeadPos = new THREE.Vector3();
-            objHeadTop_End.getWorldPosition(vHeadPos);//頭のワールド座標を取得
-            var dRate = iHeight/vHeadPos.y;
-            myModel.scale.set(dRate,dRate,dRate);
-            */
-//            console.log(objHip);
 
             //▼ 腰の高さからモデルのサイズを調整
             vHipPos_Home = new THREE.Vector3();
@@ -546,12 +538,6 @@ function main()
             objHip.position.x = +mkr[13][iF].x/dModelScale;
             objHip.position.y = +mkr[13][iF].y/dModelScale;
  
-/*
-            myModel.position.x = +mkr[0][iF].x;// - vHipPos_Home.x;//+50;
-            myModel.position.z = +mkr[0][iF].z;// - vHipPos_Home.z;
-            myModel.position.y = +mkr[0][iF].y;// - vHipPos_Home.y;
-*/
-
             var vx = new THREE.Vector3(1,0,0);
             var vy = new THREE.Vector3(0,1,0);
             var vz = new THREE.Vector3(0,0,1);
