@@ -730,7 +730,7 @@ function onResize()
 function onXZ()
 {
     bxz *=-1;
-    camera2.position.set( 0, bxz*300, faveZ);                
+    camera2.position.set( 0, -bxz*300, faveZ);                
     camera2.up = new THREE.Vector3(0,0,1);//Z UPにする
     camera2.lookAt(new THREE.Vector3(0,0,faveZ));
     cameraNow=camera2;
@@ -741,7 +741,7 @@ function onXZ()
 function onYZ()
 {
     byz *=-1;
-    camera2.position.set( byz*300, 0, faveZ);                
+    camera2.position.set( -byz*300, 0, faveZ);                
     camera2.up = new THREE.Vector3(0,0,1);//Z UPにする
     camera2.lookAt(new THREE.Vector3(0,0,faveZ));
     cameraNow=camera2;
@@ -751,8 +751,9 @@ function onYZ()
 //▼水平面
 function onXY()
 {
-    bxy*=-1;
-    camera2.position.set( 0, 0, bxy*300);  
+    //bxy*=-1;
+   // camera2.position.set( 0, 0, bxy*300);  
+    camera2.position.set( 0, 0, 300);  
     camera2.up = new THREE.Vector3(0,1,0);//Y UPにする
     camera2.lookAt(new THREE.Vector3(0,0,0));
     cameraNow=camera2;
