@@ -4,7 +4,7 @@ var sphere = [];    //マーカのMesh
 var iMkrNum = 12;   //マーカ最大数
 var iGoastMkrNum = 10;//ゴーストマーカ数
 var iDataCount=200; //フレーム最大数
-var faveZ;//重心の高さの平均
+var faveZ = 70;//視点の高さを固定値にする
 var faveHipZ;//腰の高さの平均
 var iF = 0;
 var iFrameOffset;//右接地から左接地のオフセット
@@ -114,8 +114,6 @@ function getLOPCSV()
         var tmp = str.split("\n"); // 改行を区切り文字として行を要素とした配列を生成
     
         var i, j,iMk;
-        var fmaxZ=0.0;
-        var fminZ=999.0;
 
         //▼まずは空の配列を作る
         for(iMk=0; iMk < iMkrNum + iGoastMkrNum; iMk++)
@@ -150,12 +148,6 @@ function getLOPCSV()
                 mkr[iMk][iF].x = tmpline[++j];
                 mkr[iMk][iF].y = tmpline[++j];
                 mkr[iMk][iF].z = tmpline[++j];
-
-                //Z軸の最大値と最高値を更新
-                if( fmaxZ < mkr[iMk][iF].z)
-                    fmaxZ = mkr[iMk][iF].z;
-                if( fminZ > mkr[iMk][iF].z)
-                    fminZ = mkr[iMk][iF].z;
             }
 
             
@@ -174,7 +166,16 @@ function getLOPCSV()
             mkr[12][iF].set((+mkr[2][iF].x + +mkr[3][iF].x )/2, (+mkr[2][iF].y + +mkr[3][iF].y )/2, (+mkr[2][iF].z + +mkr[3][iF].z )/2);
             //▼両腰中心
             mkr[13][iF].set(( +mkr[4][iF].x + +mkr[5][iF].x )/2, ( +mkr[4][iF].y + +mkr[5][iF].y )/2, ( +mkr[4][iF].z + +mkr[5][iF].z )/2);
-            
+            //▼腰の高さの平均を求める
+            faveHipZ = +faveHipZ + +mkr[13][iF].z;
+        }
+        faveHipZ = +faveHipZ/iDataCount;
+
+        //▼身長は腰の高さの平均の2倍とする
+        iHeight = +faveHipZ*2;
+
+        for( iF=0; iF<iDataCount; iF++ )
+        {
             var v54 = mkr[4][iF].clone().sub(mkr[5][iF]);
             //▼左Hip 内挿
             mkr[14][iF].set( +mkr[4][iF].x - v54.x*0.18, +mkr[4][iF].y - v54.y*0.18, +mkr[4][iF].z - v54.z*0.18);
@@ -200,22 +201,7 @@ function getLOPCSV()
             mkr[19][iF].set( +mkr[9][iF].x - vRin.x*0.02*iHeight, +mkr[9][iF].y - vRin.y*0.02*iHeight, +mkr[9][iF].z - vRin.z*0.02*iHeight);
             //▼右Foot 内挿
             mkr[21][iF].set( +mkr[11][iF].x - vRin.x*0.023*iHeight, +mkr[11][iF].y - vRin.y*0.023*iHeight, +mkr[11][iF].z - vRin.z*0.023*iHeight);
-
-            //▼腰の高さの平均を求める
-            faveHipZ = +faveHipZ + +mkr[13][iF].z;
-
         }
-        faveHipZ = +faveHipZ/iDataCount;
-
-        console.log(faveHipZ);
-
-        /*
-        //高さの平均値を出す（+演算子は文字列から数値を取り出す）
-        faveZ = ( (+fmaxZ) + (+fminZ) )/2;
-        faveZ = +faveZ + 15;//頭の高さの半分だけ高くする
-        console.log(faveZ);
-        */
-        faveZ = 70;
     }
 }
 
@@ -239,14 +225,9 @@ function getGaitCSV()
     function convertGaitCSVtoArray(str)
     { 
         // 読み込んだCSVデータが文字列として渡される
-        var result = []; // 最終的な二次元配列を入れるための配列
         var tmp = str.split("\n"); // 改行を区切り文字として行を要素とした配列を生成
         var tmpline = [];
 
-        //1行目を読み込み
-        tmpline = tmp[0].split(',');
-        //身長取得
-        iHeight = parseFloat(tmpline[0]);
         //2行目を読み込み
         tmpline = tmp[1].split(',');
         //右立脚(%)-右両脚支持(%)分のフレームが右と左のオフセット
@@ -289,8 +270,9 @@ function main()
     var ambientLight = new THREE.AmbientLight(0x606060);
     scene.add(ambientLight);
 
-    // スポットライト1
-    var spotLight = new THREE.SpotLight(0xffffff);
+    //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    // スポットライト1 （前）
+    var spotLight = new THREE.SpotLight(0xeeeeee);
     spotLight.position.set(-50,80,400);
     spotLight.target.position.set(scene.position);
     spotLight.castShadow = true;
@@ -306,11 +288,30 @@ function main()
         scene.add(cameraHelper);
     }
 
+    // スポットライト3（下）
+    var spotLight3 = new THREE.SpotLight(0x666666);
+    spotLight3.position.set(50,-80,-400);
+    spotLight3.target.position.set(scene.position);
+    spotLight3.castShadow = true;
+    spotLight3.shadow.mapSize.width = 1000;
+    spotLight3.shadow.mapSize.height = 1000;
+    spotLight3.shadow.camera.near=100;
+    spotLight3.shadow.camera.far=500;
+    scene.add(spotLight3);
+    //-- スポットライトの向きを表示する
+    if(0)
+    {
+        var cameraHelper3 = new THREE.CameraHelper(spotLight3.shadow.camera);
+        scene.add(cameraHelper3);
+    }
+    //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
     //軸
     var axis = new THREE.AxesHelper( 50 );
     axis.position.set(0,0,0);
     scene.add( axis);
 
+    //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     // カメラ:透視投影 (視野角,画面サイズ,カメラの見える範囲最小値,最大値)
     camera = new THREE.PerspectiveCamera( 33, canW / canH, 1, 5000);
     //camera = new THREE.OrthographicCamera(-canW, +canW, canH, -canH);
@@ -318,7 +319,7 @@ function main()
     camera.up = new THREE.Vector3(0,0,1);//Z UPにする
     camera.position.set( -200, 350, 100);
     camera.lookAt(scene.position);
-
+    //▼今のカメラ
     cameraNow = camera;
 
     //カメラ2
@@ -327,6 +328,7 @@ function main()
     camera2.up = new THREE.Vector3(0,0,1);//Z UPにする
     camera2.position.set( -200, 350, 100);
     camera2.lookAt(scene.position);
+    //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     
     onResize();
 
@@ -346,29 +348,33 @@ function main()
     //▼ FBXファイルを読み込んで配置する
     function loadFBXModel()
     {
-        // model
+
         var loader = new THREE.FBXLoader();
         loader.load( strFBXPath, function ( object ) {
+
+
             //読み込んだオブジェクトをメンバに代入する
             myModel = object;
 
-            mixer = new THREE.AnimationMixer( object );
+            mixer = new THREE.AnimationMixer( myModel );
 
-            var action = mixer.clipAction( object.animations[ 0 ] );
+            var action = mixer.clipAction( myModel.animations[ 0 ] );
             action.play();
 
-            object.traverse( function ( child ) {
+            myModel.traverse( function ( child ) {
                 if ( child.isMesh ) {
                     child.castShadow = true;
                     child.receiveShadow = true;
                 }
             } );
-            scene.add( object );
+            scene.add( myModel );
+
+            console.log(myModel);
 
             //スケルトン表示
             if(0)
             {
-                skeletonHelper  = new THREE.SkeletonHelper(object);
+                skeletonHelper  = new THREE.SkeletonHelper(myModel);
                 skeletonHelper.material.linewidth=2;
                 scene.add(skeletonHelper );			
             }
@@ -388,7 +394,6 @@ function main()
             objRArm     = myModel.getObjectByName('mixamorigRightArm');
             objLArm     = myModel.getObjectByName('mixamorigLeftArm');
             objLToe_End = myModel.getObjectByName('mixamorigLeftToe_End'); 
-
 
             //+++++++
             //▼Footをそれらしくする
@@ -530,8 +535,6 @@ function main()
             moveCilynder(mkr[iLinkFrom[iLink]][iF], mkr[iLinkTo[iLink]][iF], cylinder[iLink]);
 
         //FBXのアニメーション
-        //if ( mixer ) mixer.update( delta );
-        //if(0)
         if ( myModel )
         {     
             objHip.position.z = +mkr[13][iF].z/dModelScale;
@@ -550,8 +553,6 @@ function main()
                 //上肢
                 objSpine1.applyQuaternion( quaSpine1Pre.inverse());
                 objSpine2.applyQuaternion( quaSpine2Pre.inverse());
-//                objLArm.applyQuaternion( quaLArmPre.inverse());
-
                 //右足
                 objRUpLeg.applyQuaternion(quaRUpLegPre.inverse());
                 objRLeg.applyQuaternion( quaRLegPre.inverse());
@@ -631,13 +632,6 @@ function main()
             var quaSpine2 = rotateVectorsSimultaneously(vy,vz,vSpine2y,vSpine2z);
             objSpine2.applyQuaternion( quaSpine2Pre = quaSpine1.clone().inverse().multiply(quaSpine2));//Spine1(親)の回転をキャンセル⇒保存
 
-            //◆右腕
-           // var quaRArm = quaLUpLeg.clone();//右腕は左大腿の動きをコピー
-           // objRArm.applyQuaternion( quaRArmPre = quaSpine1.clone().inverse().multiply(quaRArm));//Spine1(親)の回転をキャンセル⇒保存
-            //◆左腕
-           // var quaLArm = quaRUpLeg.clone();//左腕は右大腿の動きをコピー
-           // objLArm.applyQuaternion( quaLArmPre = quaSpine1.clone().inverse().multiply(quaLArm));//Spine1(親)の回転をキャンセル⇒保存
-
             //▼コントロールに合わせて表示/非表示を変更する
             myModel.visible = document.form1.showObj[3].checked;
         }
@@ -662,8 +656,8 @@ function main()
     //-----------------------------------------------------------------------------------------
     //▼ u0,v0 -> u2,v2に回転するクォータニオンを求める
     //https://stackoverflow.com/questions/19445934/quaternion-from-two-vector-pairs
-    const rotateVectorsSimultaneously = (u0, v0, u2, v2) => {
-    //function rotateVectorsSimultaneously(u0, v0, u2, v2){
+    //const rotateVectorsSimultaneously = (u0, v0, u2, v2) => {
+    function rotateVectorsSimultaneously(u0, v0, u2, v2){
         const q2 = new THREE.Quaternion().setFromUnitVectors(u0, u2);
 
         const v1 = v2.clone().applyQuaternion(q2.clone().conjugate());
@@ -751,9 +745,8 @@ function onYZ()
 //▼水平面
 function onXY()
 {
-    //bxy*=-1;
-   // camera2.position.set( 0, 0, bxy*300);  
-    camera2.position.set( 0, 0, 300);  
+    bxy*=-1;
+    camera2.position.set( 0, 0, -bxy*300);  
     camera2.up = new THREE.Vector3(0,1,0);//Y UPにする
     camera2.lookAt(new THREE.Vector3(0,0,0));
     cameraNow=camera2;
