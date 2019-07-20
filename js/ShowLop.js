@@ -15,8 +15,7 @@ var iLinkSide = [0,0,0,0,1,1,1,1,2,2];//0:左　1:右　2:左->右
 var cylinder = [];  //リンクのMesh
 //var strLOPPath = "./data/LOP2.csv";
 //var strGaitPath = "./data/LOP2_Gait.csv";
-var strLOPPath = "./data/LOP_Aoki.csv";
-var strGaitPath = "./data/LOP_Aoki_Gait.csv";
+var strLOPPath = "./data/LOP_Aoki.txt";
 var strFBXPath = "./models/fbx/ybot.fbx";
 
 var mkrGroup = new THREE.Group();
@@ -66,6 +65,7 @@ window.addEventListener('load',getUrlParam);
 //▼リサイズのイベントハンドラ
 window.addEventListener('resize',onResize,false);
 
+//▼引数の解析
 function getUrlParam()
 {
     var urlPrm = new Object;
@@ -77,8 +77,7 @@ function getUrlParam()
 
     if(!urlPrm.data=="")
     {
-       strLOPPath = "./data/"+urlPrm.data+".csv";
-       strGaitPath = "./data/"+urlPrm.data+"_Gait.csv";
+       strLOPPath = "./data/"+urlPrm.data+".txt";
     }
     if(urlPrm.model=="1"){
         strFBXPath = "./models/fbx/xbot.fbx";
@@ -87,7 +86,7 @@ function getUrlParam()
         strFBXPath = "./models/fbx/ybot.fbx";
     }
 
-    getGaitCSV();
+    getLOPCSV();
 }
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -110,7 +109,6 @@ function getLOPCSV()
     function convertLOPCSVtoArray(str)
     { 
         // 読み込んだCSVデータが文字列として渡される
-        var result = []; // 最終的な二次元配列を入れるための配列
         var tmp = str.split("\n"); // 改行を区切り文字として行を要素とした配列を生成
     
         var i, j,iMk;
@@ -126,39 +124,77 @@ function getLOPCSV()
             }
         }
 
+
+        var iReadMode = 0; //1:[Gait] 2:[Data]
+        var iReadStartRow;
         var iFR=0;
+        var iFL;
         faveHipZ =0;
-        for( i=1; i<tmp.length; i++ )
+        for( i=0; i<tmp.length; i++ )
         {
             var tmpline = [];
             //カンマで区切った1行ずつ文字を取得
             tmpline = tmp[i].split(',');
 
-            //左足はOffset分ずらす
-            iFL = iFR + iFrameOffset;
-            if( iFL >= iDataCount)
+
+            //[Gait]を探す
+            if( tmpline[0] == "[Gait]" )
             {
-                iFL -= iDataCount;
+                iReadMode = 1;
+                iReadStartRow = +i+1;
             }
 
-            j = 0;
-            for( iMk=0; iMk<iMkrNum; iMk++ )
+            //[Data]を探す
+            if( tmpline[0] == "[Data]" )
             {
-                var iF = (iMk%2==0)? iFR:iFL;
-                mkr[iMk][iF].x = tmpline[++j];
-                mkr[iMk][iF].y = tmpline[++j];
-                mkr[iMk][iF].z = tmpline[++j];
+                iReadMode = 2;
+                iReadStartRow = +i+1;
             }
 
-            
-            iFR++;
-
-            if( iFR >= iDataCount)
+            //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+            //▼[Gait]読み込み
+            if(iReadMode == 1 )
             {
-                break;
+                if( i == +iReadStartRow+1)
+                {
+                    //2行目を読み込み
+                    //右立脚(%)-右両脚支持(%)分のフレームが右と左のオフセット
+                    iFrameOffset = parseInt((parseFloat(tmpline[4]) - parseFloat(tmpline[8]))*iDataCount/100);            
+                }
+            }
+            //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++            
+            //▼[Data]読み込み
+            if( iReadMode==2 )
+            {
+                if( i > +iReadStartRow )
+                {
+                    //左足はOffset分ずらす
+                    iFL = iFR + iFrameOffset;
+                    if( iFL >= iDataCount)
+                    {
+                        iFL -= iDataCount;
+                    }      
+
+                    j = 0;
+                    for( iMk=0; iMk<iMkrNum; iMk++ )
+                    {
+                        var iF = (iMk%2==0)? iFR:iFL;
+                        mkr[iMk][iF].x = tmpline[++j];
+                        mkr[iMk][iF].y = tmpline[++j];
+                        mkr[iMk][iF].z = tmpline[++j];
+                    }
+                    
+                    iFR++;
+        
+                    if( iFR >= iDataCount)
+                    {
+                        iReadMode = 0;
+                    }
+                }
             }
         }
 
+        //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++            
         //▼ゴーストマーカを定義する
         for( iF=0; iF<iDataCount; iF++ )
         {
@@ -202,37 +238,6 @@ function getLOPCSV()
             //▼右Foot 内挿
             mkr[21][iF].set( +mkr[11][iF].x - vRin.x*0.023*iHeight, +mkr[11][iF].y - vRin.y*0.023*iHeight, +mkr[11][iF].z - vRin.z*0.023*iHeight);
         }
-    }
-}
-
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-//▼GaitのCSVを読み込む
-function getGaitCSV()
-{
-    var req = new XMLHttpRequest(); // HTTPでファイルを読み込むためのXMLHttpRrequestオブジェクトを生成
-    req.open("get", strGaitPath, true); // アクセスするファイルを指定
-    req.send(null); // HTTPリクエストの発行
-    
-    // レスポンスが返ってきたらconvertCSVtoArray()を呼ぶ	
-    req.onload = function()
-    {
-        convertGaitCSVtoArray(req.responseText); // 渡されるのは読み込んだCSVデータ
-        //読み込み終わったらメイン関数を呼び出す
-        getLOPCSV();
-    }
-    //-----------------------------------------------------------------------------------------
-    // 読み込んだCSVデータを二次元配列に変換する関数の定義
-    function convertGaitCSVtoArray(str)
-    { 
-        // 読み込んだCSVデータが文字列として渡される
-        var tmp = str.split("\n"); // 改行を区切り文字として行を要素とした配列を生成
-        var tmpline = [];
-
-        //2行目を読み込み
-        tmpline = tmp[1].split(',');
-        //右立脚(%)-右両脚支持(%)分のフレームが右と左のオフセット
-        iFrameOffset = parseInt((parseFloat(tmpline[4]) - parseFloat(tmpline[8]))*iDataCount/100);
-
     }
 }
 
@@ -365,11 +370,18 @@ function main()
                 if ( child.isMesh ) {
                     child.castShadow = true;
                     child.receiveShadow = true;
+
+                    /*
+                    //半透明にする
+                    child.material.transparent=true;
+                    child.material.opacity = 0.5;
+                    child.material.color.setHex(0xaaaaff);
+                    */
                 }
             } );
             scene.add( myModel );
 
-            console.log(myModel);
+            //console.log(myModel);
 
             //スケルトン表示
             if(0)
@@ -420,7 +432,7 @@ function main()
             objRArm.rotation.z = Math.PI/2.25;
             objRArm.rotation.x = -Math.PI/6;
             objRArm.children[1].rotation.z = Math.PI/2.1;//12;
-            objRArm.children[1].children[1].rotation.z = Math.PI/3;//12;
+            objRArm.children[1].children[1].rotation.z = Math.PI/4;//12;
 
             objLArm.rotation.z = -Math.PI/2.5;
             objLArm.rotation.x = -Math.PI/5;
