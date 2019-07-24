@@ -13,6 +13,10 @@ var iLinkFrom = [2,4,6,8,3,5,7,9,2,4];//リンクFrom
 var iLinkTo = [4,6,8,10,5,7,9,11,3,5];//リンクTo
 var iLinkSide = [0,0,0,0,1,1,1,1,2,2];//0:左　1:右　2:左->右
 var cylinder = [];  //リンクのMesh
+
+var colTrajectory =[0x000050,0x000050,0x00AAFF,0xff9900,0x00CCFF,0xFF0500
+    ,0x0000FF,0xFF00FF,0x008080,0xFF0000,0x101080,0x993300
+    ,0xff0000,0xff0000,0xff0000,0xff0000,0xff0000,0xff0000,0xff0000,0xff0000,0xff0000];
 //var strLOPPath = "./data/LOP2.csv";
 //var strGaitPath = "./data/LOP2_Gait.csv";
 var strLOPPath = "./data/LOP_Aoki.txt";
@@ -311,10 +315,12 @@ function main()
     }
     //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+    /*
     //軸
     var axis = new THREE.AxesHelper( 50 );
     axis.position.set(0,0,0);
     scene.add( axis);
+    */
 
     //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     // カメラ:透視投影 (視野角,画面サイズ,カメラの見える範囲最小値,最大値)
@@ -455,10 +461,10 @@ function main()
         //▼ここではオブジェクトを追加するだけ。実際の位置はrenderScene()で設定する
         //▼マーカ
         var sphereGeometry = new THREE.SphereGeometry(1.5,20,20);
-        var sphereMaterial = new THREE.MeshLambertMaterial({color:0x7777ff});
-//        for(var iMk=1; iMk<iMkrNum + iGoastMkrNum; iMk++ )//ゴーストマーカまで表示する場合
+        //for(var iMk=1; iMk<iMkrNum + iGoastMkrNum; iMk++ )//ゴーストマーカまで表示する場合
         for(var iMk=1; iMk<iMkrNum ; iMk++ )
         {
+            var sphereMaterial = new THREE.MeshLambertMaterial({color:colTrajectory[iMk]});
             sphere[iMk] = new THREE.Mesh(sphereGeometry, sphereMaterial);
             sphere[iMk].castShadow=true;
             mkrGroup.add(sphere[iMk]);
@@ -490,23 +496,25 @@ function main()
         //▼ LOPの軌跡を描く
         for(var iMk=1; iMk<iMkrNum ; iMk++ )
         {
-            trajectoryGroup.add(createLOPTrajectory(iMk));
+            //trajectoryGroup.add(createLOPTrajectory(iMk));
+            trajectoryGroup.add(createLOPTrajectory2(iMk));
         }   
         scene.add(trajectoryGroup);
-        //LOPの軌跡オブジェクトを作成
+        
+        /*
+        //LOPの軌跡オブジェクトを作成　虹色
         function createLOPTrajectory(iMk)
         {
             var positions = [];
             var colors = [];     
             var color = new THREE.Color();
-
+          
             for ( var i = 0; i < iDataCount; i++ ) 
             {
                 positions.push( mkr[iMk][i].x, mkr[iMk][i].y, mkr[iMk][i].z);
                 color.setHSL( i/iDataCount , 1.0, 0.5 );
                 colors.push( color.r, color.g, color.b );
-            }
-
+            }           
             var geometry = new THREE.LineGeometry();
             geometry.setPositions( positions );
             geometry.setColors( colors );
@@ -522,8 +530,33 @@ function main()
         
             line.computeLineDistances();
             line.scale.set( 1, 1, 1 );
-
+            
             return line;
+        }
+        */
+        //軌跡のオブジェクト
+        function createLOPTrajectory2(iMk)
+        {
+            var positions = [];
+
+            for ( var i = 0; i < iDataCount; i++ ) 
+            {
+                positions.push( new THREE.Vector3(+mkr[iMk][i].x, +mkr[iMk][i].y, +mkr[iMk][i].z));
+            }
+            var geometry = new THREE.CatmullRomCurve3(positions);
+            geometry.type = "catmullrom";
+            geometry.closed=true;     
+            // console.log(positions);      
+			var tube = new THREE.TubeBufferGeometry( geometry, 50, .4, 10, true);
+			var material = new THREE.MeshPhongMaterial({
+                color: colTrajectory[iMk],//0x000050,//ff0f00,
+              specular: colTrajectory[iMk],//0xFCCC8C,
+              shininess: 2,//15,
+              side: THREE.DoubleSide
+           });
+           var line = new THREE.Mesh( tube, material );          
+
+           return line;            
         }
     }
     //-----------------------------------------------------------------------------------------
