@@ -2,6 +2,7 @@
 <html>
     <head>
         <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
         <title>3DLOP</title>
         <!--   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/101/three.min.js"></script>-->
         <script src="./js/three.min.js"></script>
@@ -31,25 +32,30 @@
         
         <!-- CSS読み込み -->
         <link rel="stylesheet" type="text/css" href="./css/Lop.css">
-    
+
     </head>
 
     <body>
-        <div>
-        <ul class="table-ul">
+        <!-- 視点操作ボタン -->
+        <div id="ope_view_point">
+        <ul><!-- class="table-ul">-->
             <li><a href="#" onClick="onXZ()" >前額面</a></li>
             <li><a href="#" onClick="onYZ()" >矢状面</a></li>
             <li><a href="#" onClick="onXY()" >水平面</a></li>
             <li><a href="#" onClick="onReset()" >自由視点</a></li>
         </ul>
-        <form name="form1" class="myCheckbox">
+        </div>
+        <!-- オブジェクトの表示・非表示ボタン -->
+        <div id="ope_show_object">
+        <form name="form1" >
             <input type="checkbox" name="showObj" value="マーカ" id="Group2_0" class="checkbox02"  checked="checked"/><label for="Group2_0" class="check_label">マーカ</label>
-            <input type="checkbox" name="showObj" value="リンク" id="Group2_1" class="checkbox02"  checked="checked"/><label for="Group2_1" class="check_label">リンク</label>
+            <input type="checkbox" name="showObj" value="リンク" id="Group2_1" class="checkbox02"  /><label for="Group2_1" class="check_label">リンク</label>
             <input type="checkbox" name="showObj" value="軌跡" id="Group2_2" class="checkbox02"  checked="checked"/><label for="Group2_2" class="check_label">軌跡</label>
             <input type="checkbox" name="showObj" value="モデル" id="Group2_3" class="checkbox02"  checked="checked"/><label for="Group2_3" class="check_label">モデル</label>
         </form>
-        <div id="WebGL-output"></div>
         </div>
+        <!-- Three.js オブジェクト -->
+        <div id="WebGL-output"></div>
 
         <!-- メインスクリプト読み込み  -->
         <script src="./js/ShowLop.js"></script>
