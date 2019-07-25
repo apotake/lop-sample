@@ -466,7 +466,7 @@ function main()
         {
             var sphereMaterial = new THREE.MeshLambertMaterial({color:colTrajectory[iMk]});
             sphere[iMk] = new THREE.Mesh(sphereGeometry, sphereMaterial);
-            sphere[iMk].castShadow=true;
+            //sphere[iMk].castShadow=true;
             mkrGroup.add(sphere[iMk]);
         }
         scene.add(mkrGroup);
@@ -488,7 +488,7 @@ function main()
             }                        
             var material = new THREE.MeshLambertMaterial( { color: col } );
             cylinder[iLink] = new THREE.Mesh(new THREE.CylinderGeometry(.5, .5, 1, 0, 0, true), material);
-            cylinder[iLink].castShadow=true;
+            //cylinder[iLink].castShadow=true;
             linkGroup.add(cylinder[iLink]);
         }
         scene.add(linkGroup);
