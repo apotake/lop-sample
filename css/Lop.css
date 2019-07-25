@@ -85,12 +85,13 @@ input[type="checkbox"].checkbox02:checked + label {
 @media only screen and (max-device-width: 480px) 
 {    
     /* テーブルは差分だけ---------------- */
-    /*
+    
     #ope_view_point li 
     {
-        padding: 10pt;
+        padding-top: 10pt;
+        padding-bottom: 10pt;
     }
-    */
+    
     #ope_view_point li a 
     {
         font-size: xx-large;        
