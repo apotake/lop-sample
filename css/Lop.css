@@ -4,29 +4,50 @@ body{
     overflow: hidden;
 }
 
+
 /* --------------------------------- */
-.table-ul 
+
+#ope_view_point 
 {
-    background-color:black/* #3ae*/;
+    background: #222222;/* #31A9EE;*/
+}
+
+#ope_view_point ul
+{
+    margin:0 auto;
+    padding: 0;
+    /*border-right:#fff 1px solid;*/
+    background-color:#222222/* #3ae*/;
     display: table;
-    table-layout: fixed;
-    text-align: center;
+    /*table-layout: fixed;*/
+    /*text-align: center;*/
     width: 100%;
+    overflow:hidden;
+    list-style: none;/* リストの「・」を消す */
 }
-.table-ul li 
+
+#ope_view_point li 
 {
-    border-right: 1px solid #fff;
-    display: table-cell;
+    float: left;
+    border-top: 1px solid #fff;
+    border-left: 1px solid #fff;
+    border-right: 1px solid #000000;
+    border-bottom: 1px solid #000000;
+    width:calc( 25% - 2px);
+    /*display: table-cell;*/
     vertical-align: middle;
+    text-align: center;
 }
-.table-ul li:last-child 
+#ope_view_point a:hover
 {
-    border-right: 0;
+    background: #00ffaa;
+    color:#000000;
 }
-.table-ul li a 
+
+#ope_view_point a 
 {
     color: #fff;
-    display: block;
+    display: block; /* ボックススタイルにして文字以外も押せるようにする */
     font-size: 12pt;
     text-decoration: none;
     padding: 10px 0;
@@ -39,25 +60,24 @@ input[type=checkbox] {
     display: none;
 }
 input[type="checkbox"].checkbox02:checked + label {
-    background: #31A9EE;
+    background:#006DD9;/* #31A9EE;*/
     color: #ffffff;
 }
 .check_label {
     display: block;
     float: left;
     margin: 2px;
-    width: 80px;
-    height: 10px;
+    margin-top:10px;/* 上のボタンとの間の隙間 */
+    width: calc(25% - 8px);/* 4等分から、marginとborderを引いた幅 */
     text-align: center;
+    height: 10px;
     line-height: 10px;
-    /*padding-left: 5px;*/
-    /*padding-right: 5px;*/
     cursor: pointer;
-    color: #31A9EE;
+    /*color: #31A9EE;*/
     border: 2px solid #006DD9;
-    border-radius: 5px;
-    /*font-size: xx-large;*/
-    padding: 10px;
+    border-radius: 10px;
+    padding-top: 10px;
+    padding-bottom: 10px;
 }
 /* --------------------------------- */
 
@@ -65,11 +85,13 @@ input[type="checkbox"].checkbox02:checked + label {
 @media only screen and (max-device-width: 480px) 
 {    
     /* テーブルは差分だけ---------------- */
-    .table-ul li 
+    /*
+    #ope_view_point li 
     {
         padding: 10pt;
     }
-    .table-ul li a 
+    */
+    #ope_view_point li a 
     {
         font-size: xx-large;        
     }
@@ -78,11 +100,9 @@ input[type="checkbox"].checkbox02:checked + label {
     /* --------------------------------- */
     /* checkbox02 */
    .check_label {
-        margin: 5px;
-        width: 21%;/*100px;*/
         height: 45px;
         line-height: 45px;
-        border-radius: 5px;
+        border-radius: 10px;
         font-size: xx-large;
     }
     /* --------------------------------- */
