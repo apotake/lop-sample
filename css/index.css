@@ -1,18 +1,38 @@
+
+body{
+    max-width: 800px;
+    margin: auto; 
+}
+
 h1 {
     color: #364e96;/*文字色*/
     border: solid 3px #364e96;/*線色*/
     padding: 0.5em;/*文字周りの余白*/
     border-radius: 0.5em;/*角丸*/
+    text-align: center;
  /*   font-size: xx-large;*/
-    }    
+}    
     
 /*リスト*/
-ul 
+#ope_select_model ul 
 {
     padding: 10px;
 }
+#ope_select_model p
+{
+    text-align: center;
+} 
 
-ul li, ol li 
+#ope_select_data ul 
+{
+    margin: 0 auto;
+    padding: 0;
+}
+#ope_select_data p
+{
+    text-align: center;
+}
+#ope_select_data li
 {
     color: #404040;
     border-left: solid 16px #1fa67a;/*左側の線*/
@@ -20,20 +40,21 @@ ul li, ol li
     border-bottom: solid 2px #dadada;/*下に灰色線*/
     background: whitesmoke;
     margin-bottom: 5px;/*下のバーとの余白*/
-    line-height: 1.5;
     padding: 0.5em;
     list-style-type: none!important;/*ポチ消す*/
-    /*font-weight: bold;*/
     font-size:medium;
     text-align: center;
 } 
-li a
+#ope_select_data li a
 {
+    display:block;
     text-decoration: none;/*リンクのアンダーライン非表示*/
 }
 
+/* ラジオボタン */
 .radio02{
     clear:both;
+    /*width:600px;*/
 }
 .radio02 input{
     display: none;
@@ -42,9 +63,9 @@ li a
     display: block;
     float: left;
     /*cursor: pointer;*/
-    width: 47%;/*200px;*/
-    margin: 1px 0 1px 0;
-    padding: 1.4% 0 1.5% ;
+    width: calc(50% - 2px);/*200px;*/
+    /*margin: 1px 0 1px 0;*/
+    /*padding: 1.4% 0 1.5% ;*/
     border-right: 1px solid #d7d7d7;
     background: #e5e5e5;
     color: #555e64;
@@ -53,7 +74,10 @@ li a
     line-height: 1;
     /*transition: .2s;*/
 /*    font-size: xx-large;*/
-    padding: 10px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    cursor: pointer;
+
 }
 .radio02 label:last-of-type{
     border-right: 0px;
@@ -67,69 +91,22 @@ li a
 
 @media only screen and (max-device-width: 480px) 
 {
-    h1 {
-        color: #364e96;/*文字色*/
-        border: solid 3px #364e96;/*線色*/
-        padding: 0.5em;/*文字周りの余白*/
-        border-radius: 0.5em;/*角丸*/
+    body{
+        max-width: 100%
+    }
+    
+    h1 
+    {
         font-size: xx-large;
-      }    
-    /*リスト*/
-    ul 
+    }    
+    #ope_select_data  li 
     {
-        padding: 0;
-    }
-
-    ul li, ol li 
-    {
-        color: #404040;
-        border-left: solid 16px #1fa67a;/*左側の線*/
-        border-right:  solid 16px #1fa67a;/*左側の線*/
-        border-bottom: solid 2px #dadada;/*下に灰色線*/
-        background: whitesmoke;
-        margin-bottom: 5px;/*下のバーとの余白*/
-        line-height: 1.5;
-        padding: 0.5em;
-        list-style-type: none!important;/*ポチ消す*/
-        /*font-weight: bold;*/
         font-size: xx-large;
-        text-align: center;
-    } 
-    li a
-    {
-        text-decoration: none;/*リンクのアンダーライン非表示*/
-    }
-
-    .radio02{
-        clear:both;
-    }
-    .radio02 input{
-        display: none;
     }
     .radio02 label{
-        display: block;
-        float: left;
-        /*cursor: pointer;*/
-        width: 47%;/*200px;*/
-        margin: 1px 0 1px 0;
-        padding: 1.4% 0 1.5% ;
-        border-right: 1px solid #d7d7d7;
-        background: #e5e5e5;
-        color: #555e64;
-        font-size: 14px;
-        text-align: center;
-        line-height: 1;
-        /*transition: .2s;*/
         font-size: xx-large;
-        padding: 10px;
     }
-    .radio02 label:last-of-type{
-        border-right: 0px;
-    }
-    .radio02 input[type="radio"]:checked + label {
-        background-color: #a1b91d;
-        color: #fff;
-    }
-          
-    p{font-size: xx-large;}    
+         
+    #ope_select_model  p{font-size: xx-large;}    
+    #ope_select_data  p{font-size: xx-large;}    
 }
