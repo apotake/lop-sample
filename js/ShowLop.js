@@ -4,7 +4,7 @@ var sphere = [];    //マーカのMesh
 var iMkrNum = 12;   //マーカ最大数
 var iGoastMkrNum = 10;//ゴーストマーカ数
 var iDataCount=200; //フレーム最大数
-var faveZ = 70;//視点の高さを固定値にする
+var faveZ = 75;//70;//視点の高さを固定値にする
 var faveHipZ;//腰の高さの平均
 var iF = 0;
 var iFrameOffset;//右接地から左接地のオフセット
@@ -17,10 +17,14 @@ var cylinder = [];  //リンクのMesh
 var colTrajectory =[0x000050,0x000050,0x00AAFF,0xff9900,0x00CCFF,0xFF0500
     ,0x0000FF,0xFF00FF,0x008080,0xFF0000,0x101080,0x993300
     ,0xff0000,0xff0000,0xff0000,0xff0000,0xff0000,0xff0000,0xff0000,0xff0000,0xff0000];
-//var strLOPPath = "./data/LOP2.csv";
-//var strGaitPath = "./data/LOP2_Gait.csv";
+
 var strLOPPath = "./data/LOP_Aoki.txt";
 var strFBXPath = "./models/fbx/ybot.fbx";
+var iModel = 0;  
+
+var strTitle ="";
+
+var bShowSkelton = 0;
 
 var mkrGroup = new THREE.Group();
 var linkGroup = new THREE.Group();
@@ -41,8 +45,10 @@ var dModelScale;//モデルのスケーリング
 
 //各ボーンのオブジェクト
 var objHeadTop_End, objSpine1, objSpine2, objHip;
-var objRUpLeg, objRLeg, objRFoot, objRToe_End, objRArm;
-var objLUpLeg, objLLeg, objLFoot, objLToe_End, objLArm;
+var objRUpLeg, objRLeg, objRFoot, objRToe_End;
+var objLUpLeg, objLLeg, objLFoot, objLToe_End;
+var objRArm,objRForeArm,objRHand;
+var objLArm,objLForeArm,objLHand;
 
 //初期姿勢時のFootのベクトル
 var vRFy_Home, vRFz_Home;
@@ -62,7 +68,6 @@ var scene,camera,renderer,controls,datObj,cubeTexture,mesh;　
 var camera2, cameraNow;
 
 //▼ページの読み込みを待って、getCSVを呼ぶ
-//window.addEventListener('load',getGaitCSV);
 window.addEventListener('load',getUrlParam);
 
 
@@ -83,13 +88,14 @@ function getUrlParam()
     {
        strLOPPath = "./data/"+urlPrm.data+".txt";
     }
-    if(urlPrm.model=="1"){
-        strFBXPath = "./models/fbx/xbot.fbx";
-    }
-    else{
-        strFBXPath = "./models/fbx/ybot.fbx";
-    }
 
+    //▼モデル
+    if(urlPrm.model === void 0)//undefinedの場合は、iModelを0にする
+        iModel = 0;
+    else
+        iModel = +urlPrm.model;
+
+        
     getLOPCSV();
 }
 
@@ -139,7 +145,6 @@ function getLOPCSV()
             var tmpline = [];
             //カンマで区切った1行ずつ文字を取得
             tmpline = tmp[i].split(',');
-
 
             //[Gait]を探す
             if( tmpline[0] == "[Gait]" )
@@ -272,8 +277,8 @@ function main()
     //LOPをシーンに追加
     createLOP();
 
-    //FBXを読み込む
-    loadFBXModel();
+    //モデルを読み込む
+    loadModel();
 
     // 自然光
     var ambientLight = new THREE.AmbientLight(0x606060);
@@ -355,8 +360,50 @@ function main()
     //▼レンダリング
     renderScene();
 
+    /*
+    //▼ 文字列表示
+    //++
+    var text2 = document.createElement('div');
+    text2.style.position = 'absolute';
+    //text2.style.zIndex = 1;    // if you still don't see the label, try uncommenting this
+    text2.style.width = 100;
+    text2.style.height = 100;
+    text2.style.backgroundColor = "white";
+    text2.innerHTML = strTitle;//"hi there!";
+    text2.style.top = 200 + 'px';
+    text2.style.left = 20 + 'px';
+    document.body.appendChild(text2);
+    //++
+    */
+
+
+    //-----------------------------------------------------------------------------------------
+    //▼ モデルの読み込み
+    function loadModel()
+    {
+        switch(iModel)
+        {
+            case 0:
+                strFBXPath = "./models/fbx/ybot.fbx";//ybot
+                loadFBXModel();
+                break;
+            case 1:
+                strFBXPath = "./models/fbx/xbot.fbx";//xbot
+                loadFBXModel();
+                break;
+            case 2:
+                strFBXPath = "./models/fbx/aj_tpose.fbx";//男の子
+                loadFBXModel2();
+                break;
+            case 3:
+                strFBXPath = "./models/fbx/vanguard_t_choonyung.fbx";//ロボット兵士
+                loadFBXModel();
+                break;
+        }
+    }
     //-----------------------------------------------------------------------------------------
     //▼ FBXファイルを読み込んで配置する
+    // ybot, xbot, vanguard_t_choonyung.fbx
     function loadFBXModel()
     {
 
@@ -390,13 +437,14 @@ function main()
             //console.log(myModel);
 
             //スケルトン表示
-            if(0)
+            if(bShowSkelton)
             {
                 skeletonHelper  = new THREE.SkeletonHelper(myModel);
                 skeletonHelper.material.linewidth=2;
                 scene.add(skeletonHelper );			
             }
         
+
             //▼各ボーンのオブジェクトを取得する
             objHeadTop_End = myModel.getObjectByName('mixamorigHeadTop_End');
             objSpine1   = myModel.getObjectByName('mixamorigSpine');
@@ -412,6 +460,12 @@ function main()
             objRArm     = myModel.getObjectByName('mixamorigRightArm');
             objLArm     = myModel.getObjectByName('mixamorigLeftArm');
             objLToe_End = myModel.getObjectByName('mixamorigLeftToe_End'); 
+            objRForeArm = myModel.getObjectByName('mixamorigRightForeArm');
+            objLForeArm = myModel.getObjectByName('mixamorigLeftForeArm');
+            objRHand    = myModel.getObjectByName('mixamorigRightHand');
+            objLHand    = myModel.getObjectByName('mixamorigLeftHand');
+
+            console.log(myModel);
 
             //+++++++
             //▼Footをそれらしくする
@@ -437,23 +491,128 @@ function main()
             //▼腕をそれっぽく曲げておく
             objRArm.rotation.z = Math.PI/2.25;
             objRArm.rotation.x = -Math.PI/6;
-            objRArm.children[1].rotation.z = Math.PI/2.1;//12;
-            objRArm.children[1].children[1].rotation.z = Math.PI/4;//12;
+            objRForeArm.rotation.z = Math.PI/2.1;//12;
+            objRHand.rotation.z = Math.PI/4;//12;
 
             objLArm.rotation.z = -Math.PI/2.5;
             objLArm.rotation.x = -Math.PI/5;
-            objLArm.children[1].rotation.z = -Math.PI/2.5;//12;
-            objLArm.children[1].children[1].rotation.z = -Math.PI/3.5;//12;
+            objLForeArm.rotation.z = -Math.PI/2.5;//12;
+            objLHand.rotation.z = -Math.PI/3.5;//12;
 
             //▼ 腰の高さからモデルのサイズを調整
             vHipPos_Home = new THREE.Vector3();
             objHip.getWorldPosition(vHipPos_Home);
             dModelScale = faveHipZ/vHipPos_Home.y;
             myModel.scale.set(dModelScale,dModelScale,dModelScale);            
-
+                
         } );
     }
-    
+    //-----------------------------------------------------------------------------------------
+    //▼ FBXファイルを読み込んで配置する
+    //  aj_tpose.fbx
+    function loadFBXModel2()
+    {
+
+        var loader = new THREE.FBXLoader();
+        loader.load( strFBXPath, function ( object ) {
+
+
+            //読み込んだオブジェクトをメンバに代入する
+            myModel = object;
+
+            mixer = new THREE.AnimationMixer( myModel );
+
+            var action = mixer.clipAction( myModel.animations[ 0 ] );
+            action.play();
+
+            myModel.traverse( function ( child ) {
+                if ( child.isMesh ) {
+                    child.castShadow = true;
+                    child.receiveShadow = true;
+
+                    /*
+                    //半透明にする
+                    child.material.transparent=true;
+                    child.material.opacity = 0.5;
+                    child.material.color.setHex(0xaaaaff);
+                    */
+                }
+            } );
+            scene.add( myModel );
+
+            //console.log(myModel);
+
+            //スケルトン表示
+            if(bShowSkelton)
+            {
+                skeletonHelper  = new THREE.SkeletonHelper(myModel);
+                skeletonHelper.material.linewidth=2;
+                scene.add(skeletonHelper );			
+            }
+        
+
+            //▼各ボーンのオブジェクトを取得する
+            objHeadTop_End = myModel.getObjectByName('Head');
+            objSpine1   = myModel.getObjectByName('Spine');
+            objSpine2   = myModel.getObjectByName('Spine1');
+            objHip      = myModel.getObjectByName('Hips');
+            objRUpLeg   = myModel.getObjectByName('RightUpLeg');
+            objRLeg     = myModel.getObjectByName('RightLeg');
+            objRFoot    = myModel.getObjectByName('RightFoot');
+            objRToe_End = myModel.getObjectByName('RFootTongue');//'RightToeBase');
+            objLUpLeg   = myModel.getObjectByName('LeftUpLeg');
+            objLLeg     = myModel.getObjectByName('LeftLeg');
+            objLFoot    = myModel.getObjectByName('LeftFoot');
+            objRArm     = myModel.getObjectByName('RightArm');
+            objLArm     = myModel.getObjectByName('LeftArm');
+            objLToe_End = myModel.getObjectByName('LFootTongue');//'LeftToeBase');
+            objRForeArm = myModel.getObjectByName('RightForeArm');
+            objLForeArm = myModel.getObjectByName('LeftForeArm');
+            objRHand    = myModel.getObjectByName('RightHand');
+            objLHand    = myModel.getObjectByName('LeftHand');
+
+            console.log(myModel);
+
+            //+++++++
+            //▼Footをそれらしくする
+            // 基本姿勢時の足部の軸方向（y）とそれに垂直なベクトル（z）を保持しておく
+            // ほかのボーンは、y軸とy　z軸とzが一致するが、側部は一致しないため。
+            //右
+            var vx = new THREE.Vector3(1,0,0);
+            var vRFootPos = new THREE.Vector3();
+            var vRToePos = new THREE.Vector3();
+            objRFoot.getWorldPosition(vRFootPos);
+            objRToe_End.getWorldPosition(vRToePos);
+            vRFy_Home = vRFootPos.clone().sub(vRToePos).normalize();
+            vRFz_Home = vx.clone().cross(vRFy_Home).normalize();
+            //左
+            var vLFootPos = new THREE.Vector3();
+            var vLToePos = new THREE.Vector3();
+            objLFoot.getWorldPosition(vLFootPos);
+            objLToe_End.getWorldPosition(vLToePos);
+            vLFy_Home = vLFootPos.clone().sub(vLToePos).normalize();
+            vLFz_Home = vx.clone().cross(vLFy_Home).normalize();
+            //+++++++
+
+            //▼腕をそれっぽく曲げておく
+            objRArm.rotation.z = Math.PI/2.25;
+            objRArm.rotation.x = -Math.PI/6;
+            objRForeArm.rotation.z = Math.PI/2.1;//12;
+            objRHand.rotation.z = Math.PI/4;//12;
+
+            objLArm.rotation.z = -Math.PI/2.5;
+            objLArm.rotation.x = -Math.PI/5;
+            objLForeArm.rotation.z = -Math.PI/2.5;//12;
+            objLHand.rotation.z = -Math.PI/3.5;//12;
+
+            //▼ 腰の高さからモデルのサイズを調整
+            vHipPos_Home = new THREE.Vector3();
+            objHip.getWorldPosition(vHipPos_Home);
+            dModelScale = faveHipZ/vHipPos_Home.y;
+            myModel.scale.set(dModelScale,dModelScale,dModelScale);            
+                
+        } );
+    }    
     //-----------------------------------------------------------------------------------------
     //▼ LOPのオブジェクトを作成して配置する
     function createLOP()
@@ -581,6 +740,7 @@ function main()
 
         //FBXのアニメーション
         if ( myModel )
+        if(1)
         {     
             objHip.position.z = +mkr[13][iF].z/dModelScale;
             objHip.position.x = +mkr[13][iF].x/dModelScale;
