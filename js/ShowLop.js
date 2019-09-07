@@ -4,7 +4,7 @@ var sphere = [];    //マーカのMesh
 var iMkrNum = 12;   //マーカ最大数
 var iGoastMkrNum = 10;//ゴーストマーカ数
 var iDataCount=200; //フレーム最大数
-var faveZ = 75;//70;//視点の高さを固定値にする
+var faveZ = 70;//視点の高さを固定値にする
 var faveHipZ;//腰の高さの平均
 var iF = 0;
 var iFrameOffset;//右接地から左接地のオフセット
