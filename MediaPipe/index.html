@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <!-- 3つのライブラリを読み込む -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
+    <!-- Chart.jsの読み込み -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    </head>
+<body>
+  <h1>◆◆◆◆◆ MediaPipe Handのサンプル ◆◆◆◆◆</h1>
+  <h2>手をしっかり握ると赤くなります</h2>
+  <button id="start">Camera Start</button>
+  <button id="stop">Stop</button>
+  <div class="container">
+        <!-- Webカメラの映像（入力） -->
+        <video id="input"></video>
+        <!--  認識した手の形状を可視化した映像（出力）  -->
+        <canvas id="output" width="600" height="400"></canvas>
+    </div>
+    <canvas id="chart" width="1200" height="300"></canvas>
+
+    <script>
+        // ここにプログラムを記述する
+
+const video = document.getElementById('input');
+const canvas = document.getElementById('output');
+const ctx = canvas.getContext('2d');
+const chartCanvas = document.getElementById('chart');
+const chartCtx = chartCanvas.getContext('2d');
+let chart;
+
+const config = {
+  locateFile: file => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+};
+
+//◆MediaPipe handのオブジェクトを生成
+const hands = new Hands(config);
+
+//◆カメラ画像を取得
+const camera = new Camera(video, {
+  onFrame: async () => {
+    await hands.send({image: video});
+  },
+  width: 600,
+  height: 400
+});
+
+//◆検出のオプション
+hands.setOptions({
+    maxNumHands: 2,
+    modelComplexity: 1,
+    minDetectionConfidence: 0.5,
+    minTrackingConfidence: 0.5
+});
+
+pt_finger=[]
+distanceAry=[]
+fingerCol=['aqua','blue','lime','gold']
+graphlabels=['index finger','middle finger','ring finger','little finger']
+x_max=150
+img_h=400
+
+//◆グラフ領域を生成する
+const chartConfig = {
+  plugins: [{
+    beforeDraw: drawBackground
+  }],
+  type: 'line',
+  data: {
+    labels: [],
+    datasets: [{
+      label: graphlabels[0],
+      data: [],
+      backgroundColor: fingerCol[0],
+      borderColor:fingerCol[0],
+      borderWidth: 5
+    },{
+      label: graphlabels[1],
+      data: [],
+      backgroundColor: fingerCol[1],
+      borderColor:fingerCol[1],
+      borderWidth: 5
+    },{
+      label: graphlabels[2],
+      data: [],
+      backgroundColor: fingerCol[2],
+      borderColor:fingerCol[2],
+      borderWidth: 5
+    },{
+      label: graphlabels[3],
+      data: [],
+      backgroundColor: fingerCol[3],
+      borderColor:fingerCol[3],
+      borderWidth: 5
+    }],
+  },
+  options: {
+    responsive: false,
+    animation: false,
+    scales: {
+      x:{ min:0, max:x_max },
+      y:{ min:0, max:img_h  }
+    } 
+  },
+};
+const distanceChart = new Chart(chartCtx, chartConfig);
+
+//◆MediaPipe handで形状認識した結果の取得
+hands.onResults(results => {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
+  
+  //◆手の輪郭を描く
+  drawStroke()
+
+  if (results.multiHandLandmarks) {
+    results.multiHandLandmarks.forEach(marks => {
+
+      // 緑色の線で骨組みを可視化
+      //drawConnectors(ctx, marks, HAND_CONNECTIONS, { color: "#0f0" });
+
+      // 赤色でランドマークを可視化
+      drawLandmarks(ctx, marks, { color: 	'hotpink' });
+
+      // 指の間の距離を計算して表示
+      const pt_palm = marks[0]
+      pt_finger[0] = marks[8];
+      pt_finger[1] = marks[12];
+      pt_finger[2] = marks[16];
+      pt_finger[3] = marks[20];
+
+      for(i=0; i<4; i++ ){
+        distanceAry[i] = calculateDistance(pt_palm, pt_finger[i]);
+        drawDistance(ctx, pt_palm, pt_finger[i], fingerCol[i], distanceAry[i]);
+      }
+
+      //◆ チャートにデータを追加
+      distanceChart.data.labels.push('');
+      for(i=0; i<4; i++ ){
+        distanceChart.data.datasets[i].data.push(distanceAry[i]);
+      }
+
+      //◆ データが流れていくように最初のデータを削除
+      if (distanceChart.data.datasets[0].data.length > x_max) {
+        for(i=0; i<4; i++ ){
+          distanceChart.data.datasets[i].data.shift();
+        }
+        distanceChart.data.labels.shift();
+      }    
+
+      distanceChart.update();
+    });
+  }
+});
+
+//});
+
+document.getElementById('start')
+    .addEventListener('click', () => camera.start());
+
+
+document.getElementById('stop')
+    .addEventListener('click', () =>  camera.stop());
+
+
+
+//----------
+//■距離を計算する関数
+function calculateDistance(point1, point2) {
+  const dx =( point1.x - point2.x)*canvas.width;
+  const dy = (point1.y - point2.y)*canvas.height;
+  return Math.sqrt(dx * dx + dy * dy);
+}
+
+//■距離を描く関数
+function drawDistance(ctx, point1, point2, col, distance) {
+  const x = (point1.x + point2.x) / 2*canvas.width;
+  const y = (point1.y + point2.y) / 2*canvas.height;
+
+  // 緑色の線で2つのランドマークをつなぐ
+  ctx.beginPath();
+  if(distance < img_h/2.5)//ちゃんと握ると色が変わる
+    col='red'
+  ctx.strokeStyle = col;
+  ctx.lineWidth = 5;
+  ctx.moveTo(point1.x * canvas.width, point1.y * canvas.height);
+  ctx.lineTo(point2.x * canvas.width, point2.y * canvas.height);
+  ctx.stroke();
+
+  distance = calculateDistance(point1,point2);
+  ctx.fillStyle = '#000'; 
+  ctx.font ='10px Arial';
+  ctx.fillText(distance.toFixed(1), x, y);
+
+}
+
+//■手の形を描く関数
+function drawStroke(){
+  // 線の座標を指定する
+  var points = [[293,14],[286,21],[282,48],[278,87],[274,109],[270,177],[260,158],[256,125],[252,108],[248,77],[244,46],[230,38],[220,74],[224,111],[228,157],[232,184],[217,202],[212,195],[208,187],[202,177],[197,168],[188,155],[180,143],[176,135],[172,127],[167,117],[154,110],[149,128],[153,145],[157,154],[161,162],[166,174],[171,183],[180,196],[187,208],[191,217],[195,239],[199,253],[203,265],[207,280],[211,296],[215,309],[219,321],[223,332],[227,340],[231,348],[235,358],[239,366],[243,375],[247,385],[251,396],[344,385],[346,363],[365,342],[371,333],[391,309],[410,286],[414,276],[419,266],[425,256],[440,239],[448,229],[473,204],[477,191],[453,185],[443,189],[435,193],[415,209],[406,221],[380,247],[370,250],[361,243],[357,235],[353,227],[351,180],[355,168],[359,155],[363,145],[367,136],[372,122],[376,103],[380,90],[384,75],[388,51],[383,42],[369,40],[362,49],[358,59],[354,69],[350,83],[346,93],[342,102],[336,113],[332,123],[328,134],[324,146],[320,161],[312,177],[307,140],[311,79],[311,29],[304,16],[293,14]];
+  // 線を描画する
+  col=['black','white']
+  linewidth=[6,4]
+  for(j=0;j<2;j++)
+  {
+    ctx.beginPath();
+    ctx.strokeStyle = col[j];
+    ctx.lineWidth = linewidth[j];
+    for (var i = 0; i < points.length; i++) {
+      var pt = points[i];
+      if (i == 0) {
+        ctx.moveTo(pt[0], pt[1]);
+      } else {
+        ctx.lineTo(pt[0], pt[1]);
+      }
+    }
+    ctx.stroke();
+  }
+}
+
+function drawBackground(target) { // 引数はmyChart自身とされる。
+
+let x_scale = target.scales.x; // x軸プロパティ取得
+let y_scale = target.scales.y; // y軸プロパティ取得
+
+let left = x_scale.left;       // x軸の左端座標取得
+let top = y_scale.getPixelForValue(img_h/2.5);         // y軸の上端座標取得
+let width = x_scale.width;     // x軸の幅取得
+let height =  y_scale.getPixelForValue(0)-top;    // y軸の高さ取得
+
+var cvs = document.getElementById(target.canvas.id); // もちろん'my_graph'で直接指定してもOK
+var ctx = cvs.getContext('2d');
+
+// プロット領域に重なるように、背景色の四角形を描画
+ctx.fillStyle = "	hotpink";              // 背景色（今回は濃いグレー）
+ctx.fillRect(left, top, width, height); // 四角形描画
+}
+//----------    
+
+
+    </script>
+</body>
+</html>
