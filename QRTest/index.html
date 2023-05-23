@@ -3,90 +3,71 @@
 <head>
   <title>QRコードスキャナー</title>
   <script src="https://rawgit.com/sitepoint-editors/jsqrcode/master/src/qr_packed.js"></script>
-  <style>
-    #scanModal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.8);
-      z-index: 9999;
-    }
-
-    #scanModal video {
-      width: 100%;
-      height: 100%;
-    }
-  </style>
 </head>
 <body>
-  <button id="scanButton">QRコードをスキャン</button>
-  <div id="scanModal">
-    <video id="scanVideo"></video>
-  </div>
+  <video id="video" width="300" height="300" style="border: 1px solid gray"></video>
+  <canvas id="canvas" width="300" height="300" style="display: none;"></canvas>
   <script>
-    // カメラを起動してQRコードを読み取る関数
-    function startScan() {
-      var scanVideo = document.getElementById('scanVideo');
-
-      // カメラを起動して映像を表示
+    // カメラを起動するための関数
+    function startCamera() {
       navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
         .then(function(stream) {
-          scanVideo.srcObject = stream;
-          scanVideo.play();
-          showModal();
+          var video = document.getElementById('video');
+          video.srcObject = stream;
+          video.play();
         })
         .catch(function(error) {
           console.error("カメラの起動に失敗しました: ", error);
         });
     }
 
-    // QRコードをスキャンする関数
+    // QRコードをスキャンするための関数
     function scanQRCode() {
-      var scanVideo = document.getElementById('scanVideo');
-      var canvas = document.createElement('canvas');
+      var video = document.getElementById('video');
+      var canvas = document.getElementById('canvas');
       var context = canvas.getContext('2d');
-      context.drawImage(scanVideo, 0, 0, canvas.width, canvas.height);
+      context.drawImage(video, 0, 0, 300, 300);
       try {
-        qrcode.decode(canvas.toDataURL());
+        qrcode.decode();
       } catch (error) {
         console.error("QRコードの読み取りに失敗しました: ", error);
         setTimeout(scanQRCode, 300);
       }
     }
 
-    // QRコードが読み取られたときの処理
+    // QRコードが読み込まれたときの処理
     function qrCodeScanned(data) {
       console.log("QRコードが読み取られました: ", data);
       // ここで取得したデータを利用する処理を記述します
 
-      hideModal();
-      setTimeout(startScan, 300);
+      // 再度QRコードをスキャンするために呼び出します
+      setTimeout(scanQRCode, 300);
     }
 
-    // モーダルを表示する関数
-    function showModal() {
-      var scanModal = document.getElementById('scanModal');
-      scanModal.style.display = 'block';
-    }
-
-    // モーダルを非表示にする関数
-    function hideModal() {
-      var scanModal = document.getElementById('scanModal');
-      scanModal.style.display = 'none';
-    }
-
-    // ページが読み込まれたときに初期化処理を行います
-    window.onload = function() {
-      var scanButton = document.getElementById('scanButton');
-      scanButton.addEventListener('click', function() {
-        startScan();
-      });
-
+    // QRコードの読み取りを初期化するための関数
+    function initQRCodeReader() {
+      var video = document.getElementById('video');
+      var canvas = document.getElementById('canvas');
+      var context = canvas.getContext('2d');
       qrcode.callback = qrCodeScanned;
-      startScan();
+
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        // カメラを起動してQRコードを読み取る
+        startCamera();
+
+        video.addEventListener('play', function() {
+          // カメラの映像が再生されたらQRコードを読み取る
+          setTimeout(scanQRCode, 300);
+        });
+      } else {
+        console.error("getUserMediaがサポートされていません");
+      }
+    }
+
+    // ページが読み込まれたときにQRコードの読み取りを初期化します
+    window.onload = function() {
+      initQRCodeReader();
     };
   </script>
 </body>
+</html>
