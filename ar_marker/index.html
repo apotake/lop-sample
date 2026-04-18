@@ -16,6 +16,12 @@
                 if (arjsSystem._arToolkitSource) {
                     arjsSystem._arToolkitSource.onResizeElement();
                     arjsSystem._arToolkitSource.copyElementSizeTo(scene.renderer.domElement);
+                    
+                    // 追加：ビデオ要素自体のリサイズも強制
+                    const video = document.querySelector('video');
+                    if (video) {
+                        arjsSystem._arToolkitSource.copyElementSizeTo(video);
+                    }
                 }
             }
         });
@@ -33,33 +39,28 @@
             font-family: sans-serif;
             pointer-events: none; /* 下の要素の操作を邪魔しない */
         }
-        /* AR.jsのビデオ背景を確実に表示させるための設定 */
-        .a-canvas {
-            width: 100% !important;
-            height: 100% !important;
-        }
-        /* ビデオ映像をブラウザ全体にフィット（縦横比維持） */
-        video {
-            object-fit: cover !important;
-            width: 100vw !important;
-            height: 100vh !important;
+        /* AR.jsのビデオ背景が親要素に追従するように設定 */
+        .a-scene {
+            width: 100vw;
+            height: 100vh;
             position: fixed;
             top: 0;
             left: 0;
-            z-index: -1; /* ビデオを最背面に */
         }
-        /* AR用キャンバス（3D描画）もビデオと同じサイズに合わせる */
+        /* AR用キャンバス（3D描画） */
         .a-canvas {
-            object-fit: cover !important;
-            width: 100vw !important;
-            height: 100vh !important;
+            width: 100% !important;
+            height: 100% !important;
+            top: 0 !important;
+            left: 0 !important;
+            position: absolute !important;
         }
     </style>
 </head>
 <body style="margin: 0px; overflow: hidden;">
     <div id="status">AR.js (A-Frame版) を読み込んでいます...</div>
 
-    <a-scene embedded arjs='sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3; sourceWidth: 1280; sourceHeight: 720; displayWidth: 1280; displayHeight: 720;' vr-mode-ui="enabled: false">
+    <a-scene embedded arjs='sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3;' vr-mode-ui="enabled: false">
         <a-assets>
             <img id="atsumi-img" src="atsumi.png">
             <img id="obinata-img" src="obinata.png">
