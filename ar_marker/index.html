@@ -7,6 +7,19 @@
     <!-- A-Frameタグをhead内に移動 -->
     <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+    <script>
+        // リサイズ時に AR.js の内部コンポーネントにリサイズを通知する
+        window.addEventListener('resize', () => {
+            const scene = document.querySelector('a-scene');
+            if (scene && scene.systems.arjs) {
+                const arjsSystem = scene.systems.arjs;
+                if (arjsSystem._arToolkitSource) {
+                    arjsSystem._arToolkitSource.onResizeElement();
+                    arjsSystem._arToolkitSource.copyElementSizeTo(scene.renderer.domElement);
+                }
+            }
+        });
+    </script>
     <style>
         body { margin: 0; overflow: hidden; background-color: transparent; }
         #status {
@@ -24,12 +37,28 @@
             width: 100% !important;
             height: 100% !important;
         }
+        /* ビデオ映像をブラウザ全体にフィット（縦横比維持） */
+        video {
+            object-fit: cover !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: -1; /* ビデオを最背面に */
+        }
+        /* AR用キャンバス（3D描画）もビデオと同じサイズに合わせる */
+        .a-canvas {
+            object-fit: cover !important;
+            width: 100vw !important;
+            height: 100vh !important;
+        }
     </style>
 </head>
 <body style="margin: 0px; overflow: hidden;">
     <div id="status">AR.js (A-Frame版) を読み込んでいます...</div>
 
-    <a-scene embedded arjs='sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3;' vr-mode-ui="enabled: false">
+    <a-scene embedded arjs='sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3; sourceWidth: 1280; sourceHeight: 720; displayWidth: 1280; displayHeight: 720;' vr-mode-ui="enabled: false">
         <a-assets>
             <img id="atsumi-img" src="atsumi.png">
             <img id="obinata-img" src="obinata.png">
