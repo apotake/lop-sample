@@ -26,11 +26,12 @@
             position: absolute;
             top: 10px;
             left: 10px;
-            z-index: 10;
+            z-index: 100; /* 常に最前面に表示 */
             background: rgba(0,0,0,0.5);
             color: white;
             padding: 10px;
             font-family: sans-serif;
+            pointer-events: none; /* 下の要素の操作を邪魔しない */
         }
         /* AR.jsのビデオ背景を確実に表示させるための設定 */
         .a-canvas {
@@ -108,6 +109,43 @@
         window.addEventListener('arjs-video-loaded', () => {
             document.getElementById('status').innerHTML = 'カメラ準備完了。マーカー(Barcode 3x3)をかざしてください。';
             
+            // ビデオ要素を取得して解像度を表示
+            const video = document.querySelector('video');
+            if (video) {
+                const updateResolutionText = () => {
+                    const width = video.videoWidth;
+                    const height = video.videoHeight;
+                    
+                    // 解像度がまだ確定していない(0)場合は、少し待ってから再試行
+                    if (width === 0 || height === 0) {
+                        setTimeout(updateResolutionText, 500);
+                        return;
+                    }
+
+                    const displayInfo = document.createElement('div');
+                    displayInfo.id = 'resolution-text';
+                    displayInfo.style.fontSize = '12px';
+                    displayInfo.style.marginTop = '5px';
+                    displayInfo.innerHTML = `カメラ解像度: ${width}x${height}`;
+                    
+                    const statusEl = document.getElementById('status');
+                    // 既に存在する場合は更新、なければ追加
+                    const existing = document.getElementById('resolution-text');
+                    if (existing) {
+                        existing.innerHTML = displayInfo.innerHTML;
+                    } else {
+                        statusEl.appendChild(displayInfo);
+                    }
+                };
+
+                // メタデータの読み込み完了を待つか、即時実行
+                if (video.readyState >= 1) {
+                    updateResolutionText();
+                } else {
+                    video.addEventListener('loadedmetadata', updateResolutionText);
+                }
+            }
+
             // 各画像の縦横比を維持するための処理
             const configs = [
                 { img: '#atsumi-img', display: '#atsumi-display' },
@@ -132,10 +170,16 @@
                 targetImage.setAttribute('position', `0 ${ratio / 2} 0`);
             }
 
-            setTimeout(() => {
-                document.getElementById('status').style.display = 'none';
-            }, 3000);
-        });
-    </script>
+        setTimeout(() => {
+            // ステータスメッセージを消すだけで、解像度情報は残したいため、appendChildをbodyに直付けするか、新しい要素を作成します
+            // 既存のstatus要素を消去する代わりに内容をクリアし、解像度情報を永続化させます
+            const statusEl = document.getElementById('status');
+            const resInfo = statusEl.querySelector('div')?.innerHTML || '';
+            statusEl.innerHTML = resInfo; // 初期メッセージを消し、解像度情報のみにする
+            statusEl.style.fontSize = '12px';
+            statusEl.style.padding = '5px 10px';
+        }, 3000);
+    });
+</script>
 </body>
 </html>
