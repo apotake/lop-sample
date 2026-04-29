@@ -72,7 +72,7 @@
 <body style="margin: 0px; overflow: hidden;">
     <div id="status">AR.js (A-Frame版) を読み込んでいます...</div>
 
-    <a-scene embedded arjs='sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3;' vr-mode-ui="enabled: false">
+    <a-scene embedded arjs='sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3; sourceParameters: { "sourceWidth": 1280, "sourceHeight": 720, "displayWidth": 1280, "displayHeight": 720 };' vr-mode-ui="enabled: false">
         <a-assets>
             <img id="atsumi-img" src="atsumi.png">
             <img id="obinata-img" src="obinata.png">
