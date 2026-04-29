@@ -8,6 +8,18 @@
     <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
     <script>
+        // マーカーが見つかった時にアニメーションを開始させるためのコンポーネント
+        AFRAME.registerComponent('marker-animator', {
+            init: function () {
+                this.el.addEventListener('markerFound', () => {
+                    const pivot = this.el.querySelector('[id$="-pivot"]');
+                    if (pivot) {
+                        pivot.emit('markerFound');
+                    }
+                });
+            }
+        });
+
         // リサイズ時に AR.js の内部コンポーネントにリサイズを通知する
         window.addEventListener('resize', () => {
             const scene = document.querySelector('a-scene');
@@ -68,39 +80,72 @@
         </a-assets>
 
         <!-- ID: 0 のマーカー -->
-        <a-marker type='barcode' value='0'>
+        <a-marker type='barcode' value='0' marker-animator>
             <a-plane position="0 0 0" rotation="-90 0 0" width="1.1" height="1.1" material="color: lime; wireframe: true; wireframeLinewidth: 5"></a-plane>
-            <a-image id="atsumi-display" src="#atsumi-img" position="0 0.5 0" rotation="0 90 0" width="1" height="1" 
-                     material="shader: standard; transparent: true; alphaTest: 0.5; color: #ffffff;">
-            </a-image>
+            <a-entity id="atsumi-pivot" position="0 0 0" rotation="0 0 0"
+                     animation__rotate_cw="property: rotation; from: 0 0 0; to: 0 360 0; dur: 2000; easing: linear; startEvents: animationcomplete__rotate_ccw, markerFound"
+                     animation__wait1="property: rotation; from: 0 360 0; to: 0 360 0; dur: 1000; startEvents: animationcomplete__rotate_cw"
+                     animation__tilt_on="property: rotation; from: 0 360 0; to: 0 360 -20; dur: 1000; easing: easeInOutQuad; startEvents: animationcomplete__wait1"
+                     animation__tilt_off="property: rotation; from: 0 360 -20; to: 0 360 0; dur: 1000; easing: easeInOutQuad; startEvents: animationcomplete__tilt_on"
+                     animation__wait2="property: rotation; from: 0 360 0; to: 0 360 0; dur: 1000; startEvents: animationcomplete__tilt_off"
+                     animation__rotate_ccw="property: rotation; from: 0 360 0; to: 0 0 0; dur: 2000; easing: linear; startEvents: animationcomplete__wait2">
+                <a-image id="atsumi-display" src="#atsumi-img" position="0 0.5 0" rotation="0 90 0" width="1" height="1" 
+                         material="shader: standard; transparent: true; alphaTest: 0.5; color: #ffffff;">
+                </a-image>
+            </a-entity>
             <a-entity line="start: 0 0 0; end: 1 0 0; color: red"></a-entity>
+            <a-text value="x" position="1.1 0 0" align="center" color="red" scale="0.5 0.5 0.5" rotation="-90 0 0"></a-text>
             <a-entity line="start: 0 0 0; end: 0 1 0; color: green"></a-entity>
+            <a-text value="y" position="0 1.1 0" align="center" color="green" scale="0.5 0.5 0.5" rotation="0 90 0"></a-text>
             <a-entity line="start: 0 0 0; end: 0 0 1; color: blue"></a-entity>
-            <a-text value="ID: 0" position="0 0.5 0" align="center" color="white" scale="2 2 2" rotation="-90 0 0"></a-text>
+            <a-text value="z" position="0 0 1.1" align="center" color="blue" scale="0.5 0.5 0.5" rotation="-90 0 0"></a-text>
+            <a-text value="ID: 0" position="0 0.2 -0.3" align="center" color="white" scale="1 1 1" rotation="-90 0 0"></a-text>
         </a-marker>
 
         <!-- ID: 1 のマーカー -->
-        <a-marker type='barcode' value='1'>
+        <a-marker type='barcode' value='1' marker-animator>
             <a-plane position="0 0 0" rotation="-90 0 0" width="1.1" height="1.1" material="color: lime; wireframe: true; wireframeLinewidth: 5"></a-plane>
-            <a-image id="obinata-display" src="#obinata-img" position="0 0.5 0" rotation="0 90 0" width="1" height="1" 
-                     material="shader: standard; transparent: true; alphaTest: 0.5; color: #ffffff;">
-            </a-image>
+            <a-entity id="obinata-pivot" position="0 0 0" rotation="0 0 0"
+                     animation__rotate_cw="property: rotation; from: 0 0 0; to: 0 360 0; dur: 2000; easing: linear; startEvents: animationcomplete__rotate_ccw, markerFound"
+                     animation__wait1="property: rotation; from: 0 360 0; to: 0 360 0; dur: 1000; startEvents: animationcomplete__rotate_cw"
+                     animation__tilt_on="property: rotation; from: 0 360 0; to: 0 360 -20; dur: 1000; easing: easeInOutQuad; startEvents: animationcomplete__wait1"
+                     animation__tilt_off="property: rotation; from: 0 360 -20; to: 0 360 0; dur: 1000; easing: easeInOutQuad; startEvents: animationcomplete__tilt_on"
+                     animation__wait2="property: rotation; from: 0 360 0; to: 0 360 0; dur: 1000; startEvents: animationcomplete__tilt_off"
+                     animation__rotate_ccw="property: rotation; from: 0 360 0; to: 0 0 0; dur: 2000; easing: linear; startEvents: animationcomplete__wait2">
+                <a-image id="obinata-display" src="#obinata-img" position="0 0.5 0" rotation="0 90 0" width="1" height="1" 
+                         material="shader: standard; transparent: true; alphaTest: 0.5; color: #ffffff;">
+                </a-image>
+            </a-entity>
             <a-entity line="start: 0 0 0; end: 1 0 0; color: red"></a-entity>
+            <a-text value="x" position="1.1 0 0" align="center" color="red" scale="0.5 0.5 0.5" rotation="-90 0 0"></a-text>
             <a-entity line="start: 0 0 0; end: 0 1 0; color: green"></a-entity>
+            <a-text value="y" position="0 1.1 0" align="center" color="green" scale="0.5 0.5 0.5" rotation="0 90 0"></a-text>
             <a-entity line="start: 0 0 0; end: 0 0 1; color: blue"></a-entity>
-            <a-text value="ID: 1" position="0 0.5 0" align="center" color="white" scale="2 2 2" rotation="-90 0 0"></a-text>
+            <a-text value="z" position="0 0 1.1" align="center" color="blue" scale="0.5 0.5 0.5" rotation="-90 0 0"></a-text>
+            <a-text value="ID: 1" position="0 0.2 -0.3" align="center" color="white" scale="1 1 1" rotation="-90 0 0"></a-text>
         </a-marker>
 
         <!-- ID: 2 のマーカー -->
-        <a-marker type='barcode' value='2'>
+        <a-marker type='barcode' value='2' marker-animator>
             <a-plane position="0 0 0" rotation="-90 0 0" width="1.1" height="1.1" material="color: lime; wireframe: true; wireframeLinewidth: 5"></a-plane>
-            <a-image id="yoshie-display" src="#yoshie-img" position="0 0.5 0" rotation="0 90 0" width="1" height="1" 
-                     material="shader: standard; transparent: true; alphaTest: 0.5; color: #ffffff;">
-            </a-image>
+            <a-entity id="yoshie-pivot" position="0 0 0" rotation="0 0 0"
+                     animation__rotate_cw="property: rotation; from: 0 0 0; to: 0 360 0; dur: 2000; easing: linear; startEvents: animationcomplete__rotate_ccw, markerFound"
+                     animation__wait1="property: rotation; from: 0 360 0; to: 0 360 0; dur: 1000; startEvents: animationcomplete__rotate_cw"
+                     animation__tilt_on="property: rotation; from: 0 360 0; to: 0 360 -20; dur: 1000; easing: easeInOutQuad; startEvents: animationcomplete__wait1"
+                     animation__tilt_off="property: rotation; from: 0 360 -20; to: 0 360 0; dur: 1000; easing: easeInOutQuad; startEvents: animationcomplete__tilt_on"
+                     animation__wait2="property: rotation; from: 0 360 0; to: 0 360 0; dur: 1000; startEvents: animationcomplete__tilt_off"
+                     animation__rotate_ccw="property: rotation; from: 0 360 0; to: 0 0 0; dur: 2000; easing: linear; startEvents: animationcomplete__wait2">
+                <a-image id="yoshie-display" src="#yoshie-img" position="0 0.5 0" rotation="0 90 0" width="1" height="1" 
+                         material="shader: standard; transparent: true; alphaTest: 0.5; color: #ffffff;">
+                </a-image>
+            </a-entity>
             <a-entity line="start: 0 0 0; end: 1 0 0; color: red"></a-entity>
+            <a-text value="x" position="1.1 0 0" align="center" color="red" scale="0.5 0.5 0.5" rotation="-90 0 0"></a-text>
             <a-entity line="start: 0 0 0; end: 0 1 0; color: green"></a-entity>
+            <a-text value="y" position="0 1.1 0" align="center" color="green" scale="0.5 0.5 0.5" rotation="0 90 0"></a-text>
             <a-entity line="start: 0 0 0; end: 0 0 1; color: blue"></a-entity>
-            <a-text value="ID: 2" position="0 0.5 0" align="center" color="white" scale="2 2 2" rotation="-90 0 0"></a-text>
+            <a-text value="z" position="0 0 1.1" align="center" color="blue" scale="0.5 0.5 0.5" rotation="-90 0 0"></a-text>
+            <a-text value="ID: 2" position="0 0.2 -0.3" align="center" color="white" scale="1 1 1" rotation="-90 0 0"></a-text>
         </a-marker>
 
         <a-entity camera></a-entity>
@@ -168,6 +213,8 @@
             function updateAspectRatio(img, targetImage) {
                 const ratio = img.naturalHeight / img.naturalWidth;
                 targetImage.setAttribute('height', ratio);
+                
+                // 画像の中心を高さの半分に設定することで、親要素(pivot)の(0,0,0)が画像の底辺になる
                 targetImage.setAttribute('position', `0 ${ratio / 2} 0`);
             }
 
